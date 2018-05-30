@@ -77,7 +77,16 @@ public class FaceRecogintion {
     }
 
 
+    /***
+     * 图像缩放
+     * @param image 源图像
+     * @param begin 起点坐标
+     * @param end 终点坐标
+     * @param zoom_multiples 缩放倍数
+     * @return 图像Image
+     */
     public Image getResizeImg(Image image, Point begin, Point end, double zoom_multiples) {
+
         if (image != null) {
             PixelReader pixelReader = image.getPixelReader();
 //            Mat matImage = new Mat((int) (image.getHeight()), (int) (image.getWidth()), CvType.CV_32F);
@@ -104,6 +113,12 @@ public class FaceRecogintion {
         return null;
     }
 
+
+    /***
+     * 直方图均衡化
+     * @param mat 图像矩阵
+     * @return 目标矩阵Mat
+     */
     public Mat equalization(Mat mat) {
         mat.convertTo(mat, CvType.CV_8UC1, 255, 0);
         Mat dst = new Mat();
@@ -117,5 +132,9 @@ public class FaceRecogintion {
         return dst;
     }
 
+    public Image normalize() {
+
+        return null;
+    }
 
 }

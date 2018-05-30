@@ -107,6 +107,7 @@ public class UIController {
                     ph = pw * imgHeight / imgWidth;
                 }
 
+
                 double zoom_multiples = Math.sqrt(Math.pow((p1_x - p2_x) * imgWidth / pw, 2) + Math.pow((p1_y - p2_y) * imgHeight / ph, 2)) * 2 / 128;
 
                 Point begin = new Point();
