@@ -109,13 +109,13 @@ public class UIController {
                 Point begin = new Point();
                 Point end = new Point();
                 begin.x = (int) (x - distance);
-                begin.x = (int) (begin.getX() * imgHeight / ph);
+                begin.x = (int) (begin.getX() * imgWidth / pw);
                 begin.y = (int) (y - distance * 0.5);
-                begin.y = (int) (begin.getY() * imgWidth / pw);
+                begin.y = (int) (begin.getY() * imgHeight / ph);
                 end.x = (int) (x + distance);
-                end.x = (int) (end.getX() * imgHeight / ph);
+                end.x = (int) (end.getX() * imgWidth / pw);
                 end.y = (int) (y + distance * 1.5);
-                end.y = (int) (end.getY() * imgWidth / pw);
+                end.y = (int) (end.getY() * imgHeight / ph);
                 if (begin.x < 0) {
                     begin.x = 0;
                 }
@@ -132,8 +132,6 @@ public class UIController {
                 for (Circle circle1 : circles) {
                     pane_img1.getChildren().remove(circle1);
                 }
-
-
             } else {
                 p1_x = event.getX();
                 p1_y = event.getY();

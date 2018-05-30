@@ -92,6 +92,8 @@ public class FaceRecogintion {
                     pixelWriter.setColor(x, y, color2);
                 }
             }
+
+//            Imgproc.resize();
             return writableImage;
         }
         return null;
