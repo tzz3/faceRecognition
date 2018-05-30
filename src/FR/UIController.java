@@ -66,21 +66,6 @@ public class UIController {
         }
     }
 
-    public void displaynormalize(Point begin, Point end, double zoom_multiples) {
-        if (image != null) {
-            FaceRecogintion fr = new FaceRecogintion();
-//            Image resizeImg = fr.getResizeImg(image, begin, end, zoom_multiples);
-////            img2.setImage(resizeImg);
-//            Mat mat = fr.getGrayMatFromImg(resizeImg);
-//            Image imgFromMat = fr.getImgFromMat(mat);
-//            Mat cMat = fr.getGrayMatFromImg(imgFromMat);
-//            Mat eMat = fr.equalization(cMat);
-//            Image hImg = fr.getImgFromMat(eMat);
-            Image img = fr.normalize(image, begin, end, zoom_multiples);
-            img2.setImage(img);
-        }
-    }
-
     public void onMouseClick(MouseEvent event) {
         if (img1 != null && click) {
             clickCount++;
@@ -130,11 +115,14 @@ public class UIController {
                 if (end.y > imgHeight) {
                     end.y = (int) imgHeight;
                 }
-                displaynormalize(begin, end, zoom_multiples);
                 //删除选中点
                 for (Circle circle1 : circles) {
                     pane_img1.getChildren().remove(circle1);
                 }
+
+                FaceRecogintion fr = new FaceRecogintion();
+                Image img = fr.normalize(image, begin, end, zoom_multiples);
+                img2.setImage(img);
             } else {
                 p1_x = event.getX();
                 p1_y = event.getY();
