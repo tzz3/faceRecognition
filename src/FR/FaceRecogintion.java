@@ -20,6 +20,7 @@ import static org.opencv.imgproc.Imgproc.equalizeHist;
 
 public class FaceRecogintion {
     private Image image;
+    private Image nlImg;
     private Mat mat;
 
     FaceRecogintion() {
@@ -139,7 +140,8 @@ public class FaceRecogintion {
         Image imgFromMat = getImgFromMat(mat);
         Mat cMat = getGrayMatFromImg(imgFromMat);
         Mat eMat = equalization(cMat);
-        return getImgFromMat(eMat);
+        nlImg = getImgFromMat(eMat);
+        return nlImg;
     }
 
 }

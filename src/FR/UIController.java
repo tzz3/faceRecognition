@@ -1,5 +1,6 @@
 package FR;
 
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -12,8 +13,10 @@ import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 
@@ -30,6 +33,8 @@ public class UIController {
     private Pane pane1;
     @FXML
     private Pane pane_img1;
+    @FXML
+    private Button saveButton;
 
     private File file = null;
     private Image image = null;
@@ -66,6 +71,10 @@ public class UIController {
         }
     }
 
+    /***
+     * 鼠标选点
+     * @param event
+     */
     public void onMouseClick(MouseEvent event) {
         if (img1 != null && click) {
             clickCount++;
@@ -131,7 +140,37 @@ public class UIController {
 
     }
 
+    /**
+     * 允许点击
+     *
+     * @param event
+     */
     public void normalize(ActionEvent event) {
         click = true;
     }
+
+
+    public void savePic(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Image");
+        String picDir = "C:\\Users\\tzz\\Desktop\\图像处理课程设计2018秋";
+        fileChooser.setInitialDirectory(new File(picDir));
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("JPG", "*.jpg"),
+                new FileChooser.ExtensionFilter("PNG", "*.png"),
+                new FileChooser.ExtensionFilter("All Images", "*.*")
+        );
+        FaceRecogintion FR = new FaceRecogintion();
+        Stage stage = new Stage();
+        File file = fileChooser.showSaveDialog(stage);
+        if (file != null) {
+            try {
+                ImageIO.write(SwingFXUtils.fromFXImage(img2.getImage(),
+                        null), "png", file);
+            } catch (IOException ex) {
+                System.out.println(ex.getMessage());
+            }
+        }
+    }
+
 }
