@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="400.0" prefWidth="735.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="test.FRUIController">
+    <Button layoutX="67.0" layoutY="112.0" mnemonicParsing="false" onAction="#selectDir" prefHeight="56.0"
+            prefWidth="115.0" text="Button"/>
+    <Button fx:id="bt1" layoutX="67.0" layoutY="223.0" mnemonicParsing="false" onAction="#selectFile" prefHeight="56.0"
+            prefWidth="115.0" text="Button"/>
+    <TextArea fx:id="ta1" editable="false" layoutX="521.0" layoutY="100.0" prefHeight="200.0" prefWidth="200.0"/>
+    <TextArea editable="false" layoutX="262.0" layoutY="321.0" prefHeight="47.0" prefWidth="162.0"/>
+    <ImageView fx:id="image1" fitHeight="200.0" fitWidth="200.0" layoutX="243.0" layoutY="100.0" pickOnBounds="true"
+               preserveRatio="true"/>
+</AnchorPane>

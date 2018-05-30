@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="opencv-341">
+    <CLASSES>
+      <root url="jar://D:/Program Files/opencv/build/java/opencv-341.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <NATIVE>
+      <root url="file://D:/Program Files/opencv/build/java/x64" />
+    </NATIVE>
+    <SOURCES>
+      <root url="jar://D:/Program Files/opencv/build/java/opencv-341.jar!/" />
+    </SOURCES>
+  </library>
+</component>
