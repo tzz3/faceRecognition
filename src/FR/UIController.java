@@ -11,7 +11,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.opencv.core.Mat;
 
 import java.awt.*;
 import java.io.File;
@@ -70,10 +69,13 @@ public class UIController {
         if (image != null) {
             FaceRecogintion fr = new FaceRecogintion();
             Image resizeImg = fr.getResizeImg(image, begin, end, zoom_multiples);
-            Mat mat = fr.getGrayMatFromImg(resizeImg);
-            Image imgFromMat = fr.getImgFromMat(mat);
-
-            img2.setImage(imgFromMat);
+            img2.setImage(resizeImg);
+//            Mat mat = fr.getGrayMatFromImg(resizeImg);
+//            Image imgFromMat = fr.getImgFromMat(mat);
+//            Mat cMat = fr.getGrayMatFromImg(imgFromMat);
+//            cMat = fr.equalization(cMat);
+//            Image hImg = fr.getImgFromMat(cMat);
+//            img2.setImage(hImg);
         }
     }
 
@@ -91,25 +93,47 @@ public class UIController {
                 double distance = Math.sqrt(Math.pow((p1_x - p2_x), 2) + Math.pow((p1_y - p2_y), 2));
                 double zoom_multiples = distance * 2 / 128;
                 double x, y;
-                Point begin = new Point();
-                Point end = new Point();
                 x = (p1_x + p2_x) / 2;
                 y = (p1_y + p2_y) / 2;
 
 
+                FaceRecogintion fr = new FaceRecogintion();
+                double imgHeight = image.getHeight();
+                double imgWidth = image.getWidth();
+                double pw = pane_img1.getWidth(), ph = pane_img1.getHeight();//pane height width
+                if (imgHeight > imgWidth) {
+                    pw = imgWidth * ph / imgHeight;
+                } else {
+                    ph = pw * imgHeight / imgWidth;
+                }
+                Point begin = new Point();
+                Point end = new Point();
                 begin.x = (int) (x - distance);
+                begin.x = (int) (begin.getX() * imgHeight / ph);
                 begin.y = (int) (y - distance * 0.5);
+                begin.y = (int) (begin.getY() * imgWidth / pw);
                 end.x = (int) (x + distance);
+                end.x = (int) (end.getX() * imgHeight / ph);
                 end.y = (int) (y + distance * 1.5);
-
-
-
-
+                end.y = (int) (end.getY() * imgWidth / pw);
+                if (begin.x < 0) {
+                    begin.x = 0;
+                }
+                if (begin.y < 0) {
+                    begin.y = 0;
+                }
+                if (end.x > imgWidth) {
+                    end.x = (int) imgWidth;
+                }
+                if (end.y > imgHeight) {
+                    end.y = (int) imgHeight;
+                }
                 displaynormalize(begin, end, zoom_multiples);
-
                 for (Circle circle1 : circles) {
                     pane_img1.getChildren().remove(circle1);
                 }
+
+
             } else {
                 p1_x = event.getX();
                 p1_y = event.getY();

@@ -10,8 +10,14 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.opencv.imgproc.Imgproc.equalizeHist;
 
 public class FaceRecogintion {
+    private Image image;
+    private Mat mat;
 
     FaceRecogintion() {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -73,7 +79,7 @@ public class FaceRecogintion {
             PixelReader pixelReader = image.getPixelReader();
 //            Mat matImage = new Mat((int) (image.getHeight()), (int) (image.getWidth()), CvType.CV_32F);
 
-            WritableImage writableImage = new WritableImage((int) (image.getHeight()), (int) (image.getWidth()));
+            WritableImage writableImage = new WritableImage((int) (image.getWidth()), (int) (image.getHeight()));
             PixelWriter pixelWriter = writableImage.getPixelWriter();
 
             for (int y = begin.y; y < end.y; y++) {
@@ -90,5 +96,19 @@ public class FaceRecogintion {
         }
         return null;
     }
+
+    public Mat equalization(Mat mat) {
+        Mat dst = new Mat();
+        List<Mat> mv = new ArrayList<>();
+        Core.split(mat, mv);
+        for (int i = 0; i < mat.channels(); i++) {
+            equalizeHist(mv.get(i), mv.get(i));
+        }
+        Core.merge(mv, dst);
+        dst.convertTo(dst, CvType.CV_32FC1,1.0/255,0);
+//        Imgcodecs.imwrite("equlizeHist.jpg", dst);
+        return dst;
+    }
+
 
 }
