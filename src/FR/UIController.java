@@ -11,7 +11,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.opencv.core.Mat;
 
 import java.awt.*;
 import java.io.File;
@@ -48,6 +47,7 @@ public class UIController {
      * @param actionEvent
      */
     public void selectFile(ActionEvent actionEvent) {
+        clickCount = 0;
         final FileChooser filechooser = new FileChooser();
         String picDir = "C:\\Users\\tzz\\Desktop\\图像处理课程设计2018秋\\人脸测试库";
         filechooser.setInitialDirectory(new File(picDir));
@@ -69,14 +69,15 @@ public class UIController {
     public void displaynormalize(Point begin, Point end, double zoom_multiples) {
         if (image != null) {
             FaceRecogintion fr = new FaceRecogintion();
-            Image resizeImg = fr.getResizeImg(image, begin, end, zoom_multiples);
-            img2.setImage(resizeImg);
-            Mat mat = fr.getGrayMatFromImg(resizeImg);
-            Image imgFromMat = fr.getImgFromMat(mat);
-            Mat cMat = fr.getGrayMatFromImg(imgFromMat);
-            Mat eMat = fr.equalization(cMat);
-            Image hImg = fr.getImgFromMat(eMat);
-            img2.setImage(hImg);
+//            Image resizeImg = fr.getResizeImg(image, begin, end, zoom_multiples);
+////            img2.setImage(resizeImg);
+//            Mat mat = fr.getGrayMatFromImg(resizeImg);
+//            Image imgFromMat = fr.getImgFromMat(mat);
+//            Mat cMat = fr.getGrayMatFromImg(imgFromMat);
+//            Mat eMat = fr.equalization(cMat);
+//            Image hImg = fr.getImgFromMat(eMat);
+            Image img = fr.normalize(image, begin, end, zoom_multiples);
+            img2.setImage(img);
         }
     }
 
@@ -87,13 +88,11 @@ public class UIController {
             circles.add(circle);
             circle.setFill(Color.RED);
             pane_img1.getChildren().add(circle);
-            if (clickCount == 2) {
+            if (clickCount >= 2) {
                 p2_x = event.getX();
                 p2_y = event.getY();
 
                 double distance = Math.sqrt(Math.pow((p1_x - p2_x), 2) + Math.pow((p1_y - p2_y), 2));
-
-
                 double x, y;
                 x = (p1_x + p2_x) / 2;
                 y = (p1_y + p2_y) / 2;
@@ -106,7 +105,6 @@ public class UIController {
                 } else {
                     ph = pw * imgHeight / imgWidth;
                 }
-
 
                 double zoom_multiples = Math.sqrt(Math.pow((p1_x - p2_x) * imgWidth / pw, 2) + Math.pow((p1_y - p2_y) * imgHeight / ph, 2)) * 2 / 128;
 
@@ -133,6 +131,7 @@ public class UIController {
                     end.y = (int) imgHeight;
                 }
                 displaynormalize(begin, end, zoom_multiples);
+                //删除选中点
                 for (Circle circle1 : circles) {
                     pane_img1.getChildren().remove(circle1);
                 }

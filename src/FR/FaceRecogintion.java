@@ -132,9 +132,14 @@ public class FaceRecogintion {
         return dst;
     }
 
-    public Image normalize() {
-
-        return null;
+    public Image normalize(Image image, Point begin, Point end, double zoom_multiples) {
+//        FaceRecogintion fr = new FaceRecogintion();
+        Image resizeImg = getResizeImg(image, begin, end, zoom_multiples);
+        Mat mat = getGrayMatFromImg(resizeImg);
+        Image imgFromMat = getImgFromMat(mat);
+        Mat cMat = getGrayMatFromImg(imgFromMat);
+        Mat eMat = equalization(cMat);
+        return getImgFromMat(eMat);
     }
 
 }
