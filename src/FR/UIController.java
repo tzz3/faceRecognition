@@ -11,6 +11,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.opencv.core.Mat;
 
 import java.awt.*;
 import java.io.File;
@@ -70,12 +71,12 @@ public class UIController {
             FaceRecogintion fr = new FaceRecogintion();
             Image resizeImg = fr.getResizeImg(image, begin, end, zoom_multiples);
             img2.setImage(resizeImg);
-//            Mat mat = fr.getGrayMatFromImg(resizeImg);
-//            Image imgFromMat = fr.getImgFromMat(mat);
-//            Mat cMat = fr.getGrayMatFromImg(imgFromMat);
-//            cMat = fr.equalization(cMat);
-//            Image hImg = fr.getImgFromMat(cMat);
-//            img2.setImage(hImg);
+            Mat mat = fr.getGrayMatFromImg(resizeImg);
+            Image imgFromMat = fr.getImgFromMat(mat);
+            Mat cMat = fr.getGrayMatFromImg(imgFromMat);
+            Mat eMat = fr.equalization(cMat);
+            Image hImg = fr.getImgFromMat(eMat);
+            img2.setImage(hImg);
         }
     }
 
@@ -91,13 +92,12 @@ public class UIController {
                 p2_y = event.getY();
 
                 double distance = Math.sqrt(Math.pow((p1_x - p2_x), 2) + Math.pow((p1_y - p2_y), 2));
-                double zoom_multiples = distance * 2 / 128;
+
+
                 double x, y;
                 x = (p1_x + p2_x) / 2;
                 y = (p1_y + p2_y) / 2;
 
-
-                FaceRecogintion fr = new FaceRecogintion();
                 double imgHeight = image.getHeight();
                 double imgWidth = image.getWidth();
                 double pw = pane_img1.getWidth(), ph = pane_img1.getHeight();//pane height width
@@ -106,6 +106,9 @@ public class UIController {
                 } else {
                     ph = pw * imgHeight / imgWidth;
                 }
+
+                double zoom_multiples = Math.sqrt(Math.pow((p1_x - p2_x) * imgWidth / pw, 2) + Math.pow((p1_y - p2_y) * imgHeight / ph, 2)) * 2 / 128;
+
                 Point begin = new Point();
                 Point end = new Point();
                 begin.x = (int) (x - distance);

@@ -8,11 +8,14 @@ import javafx.scene.paint.Color;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.opencv.imgproc.Imgproc.INTER_LINEAR;
 import static org.opencv.imgproc.Imgproc.equalizeHist;
 
 public class FaceRecogintion {
@@ -79,27 +82,30 @@ public class FaceRecogintion {
             PixelReader pixelReader = image.getPixelReader();
 //            Mat matImage = new Mat((int) (image.getHeight()), (int) (image.getWidth()), CvType.CV_32F);
 
-            WritableImage writableImage = new WritableImage((int) (image.getWidth()), (int) (image.getHeight()));
+            WritableImage writableImage = new WritableImage((int) (end.getX() - begin.getX()), (int) (end.getY() - begin.getY()));
             PixelWriter pixelWriter = writableImage.getPixelWriter();
 
-            for (int y = begin.y; y < end.y; y++) {
-                for (int x = begin.x; x < end.x; x++) {
+            for (int y = (int) begin.getY(); y < end.getY(); y++) {
+                for (int x = (int) begin.getX(); x < end.getX(); x++) {
                     Color color = pixelReader.getColor(x, y);
                     double x1 = color.getBlue();
                     double x2 = color.getRed();
                     double x3 = color.getGreen();
                     Color color2 = new Color(x2, x3, x1, 1);
-                    pixelWriter.setColor(x, y, color2);
+                    pixelWriter.setColor((int) (x - begin.getX()), (int) (y - begin.getY()), color2);
                 }
             }
-
-//            Imgproc.resize();
-            return writableImage;
+            Mat src = getGrayMatFromImg(writableImage);
+            Mat dst = new Mat();
+            Imgproc.resize(src, dst, new Size(writableImage.getWidth() * zoom_multiples, writableImage.getHeight() * zoom_multiples), 0, 0, INTER_LINEAR);
+            return getImgFromMat(dst);
+//            return writableImage;
         }
         return null;
     }
 
     public Mat equalization(Mat mat) {
+        mat.convertTo(mat, CvType.CV_8UC1, 255, 0);
         Mat dst = new Mat();
         List<Mat> mv = new ArrayList<>();
         Core.split(mat, mv);
@@ -107,8 +113,7 @@ public class FaceRecogintion {
             equalizeHist(mv.get(i), mv.get(i));
         }
         Core.merge(mv, dst);
-        dst.convertTo(dst, CvType.CV_32FC1,1.0/255,0);
-//        Imgcodecs.imwrite("equlizeHist.jpg", dst);
+        dst.convertTo(dst, CvType.CV_32FC1, 1.0 / 255, 0);
         return dst;
     }
 
