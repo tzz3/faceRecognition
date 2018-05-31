@@ -124,7 +124,7 @@ public class UIController {
                 if (end.y > imgHeight) {
                     end.y = (int) imgHeight;
                 }
-                //删除选中点
+                //从界面上删除选中点
                 for (Circle circle1 : circles) {
                     pane_img1.getChildren().remove(circle1);
                 }

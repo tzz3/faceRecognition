@@ -20,19 +20,22 @@ import static org.opencv.imgproc.Imgproc.equalizeHist;
 
 public class FaceRecogintion {
     private Image image;
-    private Image nlImg;
     private Mat mat;
 
     FaceRecogintion() {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
 
+    /***
+     * 图像转化为灰度Mat矩阵
+     * @param image 源图像
+     * @return 灰度Mat矩阵
+     */
     public Mat getGrayMatFromImg(Image image) {
         if (image != null) {
             PixelReader pixelReader = image.getPixelReader();
             Mat matImage = new Mat((int) (image.getHeight()), (int) (image.getWidth()), CvType.CV_32F);
             //遍历源图像每个像素，将其写入到目标图像
-
             for (int y = 0; y < image.getHeight(); y++) {
                 for (int x = 0; x < image.getWidth(); x++) {
                     Color color = pixelReader.getColor(x, y);
@@ -45,6 +48,11 @@ public class FaceRecogintion {
         return null;
     }
 
+    /***
+     * Mat转化为Img
+     * @param matImg Mat矩阵
+     * @return Img图像
+     */
     public Image getImgFromMat(Mat matImg) {
         if (matImg != null) {
             WritableImage wImage = new WritableImage(matImg.width(), matImg.height());
@@ -109,7 +117,6 @@ public class FaceRecogintion {
             Mat dst = new Mat();
             Imgproc.resize(src, dst, new Size(writableImage.getWidth() * zoom_multiples, writableImage.getHeight() * zoom_multiples), 0, 0, INTER_LINEAR);
             return getImgFromMat(dst);
-//            return writableImage;
         }
         return null;
     }
@@ -147,8 +154,7 @@ public class FaceRecogintion {
         Image imgFromMat = getImgFromMat(mat);
         Mat cMat = getGrayMatFromImg(imgFromMat);
         Mat eMat = equalization(cMat);
-        nlImg = getImgFromMat(eMat);
-        return nlImg;
+        return getImgFromMat(eMat);
     }
 
 }

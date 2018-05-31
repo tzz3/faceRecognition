@@ -7,7 +7,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.util.Objects;
-//out/production/faceRecognition/FR/UI.fxml
 
 public class Main extends Application {
     @Override
