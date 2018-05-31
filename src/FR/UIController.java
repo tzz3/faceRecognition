@@ -49,7 +49,7 @@ public class UIController {
 
     /***
      * 选择图片
-     * @param actionEvent
+     * @param actionEvent ActionEvent
      */
     public void selectFile(ActionEvent actionEvent) {
         clickCount = 0;
@@ -73,7 +73,7 @@ public class UIController {
 
     /***
      * 鼠标选点
-     * @param event
+     * @param event ActionEvent
      */
     public void onMouseClick(MouseEvent event) {
         if (img1 != null && click) {
@@ -143,13 +143,16 @@ public class UIController {
     /**
      * 允许点击
      *
-     * @param event
+     * @param event ActionEvent
      */
     public void normalize(ActionEvent event) {
         click = true;
     }
 
-
+    /***
+     * 保存图片
+     * @param event ActionEvent
+     */
     public void savePic(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save Image");

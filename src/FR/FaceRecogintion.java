@@ -133,8 +133,15 @@ public class FaceRecogintion {
         return dst;
     }
 
+    /***
+     * 直方图均衡化
+     * @param image 源图像
+     * @param begin 起点坐标
+     * @param end 终点坐标
+     * @param zoom_multiples 缩放率
+     * @return 目标图像
+     */
     public Image normalize(Image image, Point begin, Point end, double zoom_multiples) {
-//        FaceRecogintion fr = new FaceRecogintion();
         Image resizeImg = getResizeImg(image, begin, end, zoom_multiples);
         Mat mat = getGrayMatFromImg(resizeImg);
         Image imgFromMat = getImgFromMat(mat);
