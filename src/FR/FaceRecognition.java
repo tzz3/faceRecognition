@@ -28,8 +28,9 @@ import static org.opencv.imgproc.Imgproc.equalizeHist;
 public class FaceRecognition {
     private Image image;
     private Mat mat;
-    private Mat trainFaceMat;//样本训练矩阵
-    private Mat meanFaceMat;//平均值矩阵
+    private Mat trainFaceMat = null;//样本训练矩阵
+    private Mat meanFaceMat = null;//平均值矩阵
+    private Mat normTrainFaceMat = null;//规格化训练样本矩阵
     private int matRows;//矩阵行 height y
     private int matCols = 48 * 48;//矩阵列 width x
 
@@ -249,7 +250,7 @@ public class FaceRecognition {
     /**
      * 计算平均矩阵
      */
-    public void getMeanFaceMat() {
+    public void cirMeanFaceMat() {
         meanFaceMat = new Mat(1, matCols, CV_32FC1);
         int sum = 0, count = 0;
         for (int c = 0; c < matCols; c++) {
@@ -276,14 +277,19 @@ public class FaceRecognition {
         }
     }
 
-    public void getNormTrainFaceMat() {
+    public void cirNormTrainFaceMat() {
         // TODO: 2018/6/1 计算规格化训练矩阵
-        Mat normTrainFaceMat = new Mat(matRows, matCols, CV_32FC1);
-        for (int x = 0; x < matCols; x++) {
-            for (int y = 0; y < matRows; y++) {
-
+        normTrainFaceMat = new Mat(matRows, matCols, CV_32FC1);
+        for (int x = 0; x < matRows; x++) {
+            for (int y = 0; y < matCols; y++) {
+                normTrainFaceMat.put(x, y, trainFaceMat.get(x, y)[0] - meanFaceMat.get(0, y)[0]);
             }
         }
+//        for (int i = 0; i < matRows; i++) {
+//            for (int j = 0; j < matCols; j++) {
+//                System.out.print(Arrays.toString(normTrainFaceMat.get(i, j)) + " ");
+//            }
+//            System.out.println();
+//        }
     }
-
 }

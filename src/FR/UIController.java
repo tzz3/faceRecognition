@@ -200,7 +200,8 @@ public class UIController {
     public void training() {
         FaceRecognition FR = new FaceRecognition();
         FR.getTrainFaceMat(imgList);
-        FR.getMeanFaceMat();
+        FR.cirMeanFaceMat();
+        FR.cirNormTrainFaceMat();
     }
 
 }
