@@ -10,6 +10,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -45,6 +46,7 @@ public class UIController {
     private double p2_y;
     private int clickCount = 0;
     private ArrayList<Circle> circles = new ArrayList<>();
+    ArrayList<File> imgList = new ArrayList<>();
 
 
     /***
@@ -129,7 +131,7 @@ public class UIController {
                     pane_img1.getChildren().remove(circle1);
                 }
 
-                FaceRecogintion fr = new FaceRecogintion();
+                FaceRecognition fr = new FaceRecognition();
                 Image img = fr.normalize(image, begin, end, zoom_multiples);
                 img2.setImage(img);
             } else {
@@ -141,7 +143,7 @@ public class UIController {
     }
 
     /**
-     * 允许点击
+     * 允许点击选点
      *
      * @param event ActionEvent
      */
@@ -163,7 +165,7 @@ public class UIController {
                 new FileChooser.ExtensionFilter("PNG", "*.png"),
                 new FileChooser.ExtensionFilter("All Images", "*.*")
         );
-        FaceRecogintion FR = new FaceRecogintion();
+        FaceRecognition FR = new FaceRecognition();
         Stage stage = new Stage();
         File file = fileChooser.showSaveDialog(stage);
         if (file != null) {
@@ -174,6 +176,30 @@ public class UIController {
                 System.out.println(ex.getMessage());
             }
         }
+    }
+
+
+    /***
+     * 选择训练文件夹
+     * @param actionEvent ActionEvent
+     */
+    public void selectDir(ActionEvent actionEvent) {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setInitialDirectory(new File("C:\\Users\\tzz\\Desktop\\图像处理课程设计2018秋"));
+        Stage stage = new Stage();
+        File dir = directoryChooser.showDialog(stage);
+        if (dir != null) {
+            imgList = FaceRecognition.getImages(dir);
+        }
+    }
+
+    /**
+     * 样本训练
+     */
+    public void training() {
+        FaceRecognition FR = new FaceRecognition();
+        FR.getTrainFaceMat(imgList);
+        FR.getMeanFaceMat();
     }
 
 }

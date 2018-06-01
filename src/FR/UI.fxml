@@ -37,8 +37,8 @@
                     <content>
                         <Pane prefHeight="200.0" prefWidth="200.0">
                             <children>
-                                <Button fx:id="bt3" layoutX="100.0" layoutY="30.0" mnemonicParsing="false" prefHeight="48.0" prefWidth="99.0" text="打开图像集" />
-                                <Button fx:id="bt5" layoutX="350.0" layoutY="30.0" mnemonicParsing="false" prefHeight="48.0" prefWidth="99.0" text="样本训练" />
+                                <Button fx:id="bt3" layoutX="100.0" layoutY="30.0" mnemonicParsing="false" onAction="#selectDir" prefHeight="48.0" prefWidth="99.0" text="打开图像集" />
+                                <Button fx:id="bt5" layoutX="350.0" layoutY="30.0" mnemonicParsing="false" onAction="#training" prefHeight="48.0" prefWidth="99.0" text="样本训练" />
                             </children>
                         </Pane>
                     </content>

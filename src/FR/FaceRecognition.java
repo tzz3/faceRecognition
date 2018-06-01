@@ -11,18 +11,31 @@ import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import static org.opencv.core.CvType.CV_32FC1;
 import static org.opencv.imgproc.Imgproc.INTER_LINEAR;
 import static org.opencv.imgproc.Imgproc.equalizeHist;
 
-public class FaceRecogintion {
+public class FaceRecognition {
     private Image image;
     private Mat mat;
+    private Mat trainFaceMat;//样本训练矩阵
+    private Mat meanFaceMat;//平均值矩阵
+    private int matRows;//矩阵行
+    private int matCols = 5000;//矩阵列
 
-    FaceRecogintion() {
+
+
+    FaceRecognition() {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
 
@@ -136,7 +149,7 @@ public class FaceRecogintion {
             equalizeHist(mv.get(i), mv.get(i));
         }
         Core.merge(mv, dst);
-        dst.convertTo(dst, CvType.CV_32FC1, 1.0 / 255, 0);
+        dst.convertTo(dst, CV_32FC1, 1.0 / 255, 0);
         return dst;
     }
 
@@ -155,6 +168,122 @@ public class FaceRecogintion {
         Mat cMat = getGrayMatFromImg(imgFromMat);
         Mat eMat = equalization(cMat);
         return getImgFromMat(eMat);
+    }
+
+    /***
+     * 判断是否为图片
+     * @param file 输入File
+     * @return boolean
+     */
+    private static boolean isImage(File file) {
+        boolean flag = false;
+        try {
+            ImageInputStream imageInputStream = ImageIO.createImageInputStream(file);
+            if (imageInputStream == null) {
+                return false;
+            }
+            imageInputStream.close();
+            flag = true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return flag;
+    }
+
+    /***
+     * 获取所有图像文件名
+     * @param dir 文件夹名
+     * @return List
+     */
+    public static ArrayList<File> getImages(File dir) {
+        File[] files = dir.listFiles();
+        ArrayList<File> fileArrayList = new ArrayList<>();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isFile() && isImage(file)) {
+                    fileArrayList.add(file);
+                }
+            }
+            System.out.println(fileArrayList.toString());
+        }
+        return fileArrayList;
+    }
+
+    /***
+     * 获取TrainFaceMat
+     * @param arrayList 所有图像文件
+     */
+    public void getTrainFaceMat(ArrayList<File> arrayList) {
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        matRows = arrayList.size();
+        System.out.println(matRows);
+        arrayList.sort(File::compareTo);
+        trainFaceMat = new Mat(matRows, matCols, CV_32FC1);
+        int countMat = 0;
+        for (File file : arrayList) {
+            try {
+                Image image = new Image(file.toURI().toURL().toString());
+                PixelReader pixelReader = image.getPixelReader();
+                double[] pixelList = new double[(int) (image.getWidth() * image.getHeight())];
+//                System.out.println(file.toURI().toURL().toString());
+//                System.out.println(image.getHeight() + " " + image.getWidth());
+                int z = 0;
+                for (int x = 0; x < image.getWidth(); x++) {
+                    for (int y = 0; y < image.getHeight(); y++) {
+                        Color color = pixelReader.getColor(x, y);
+                        float gray = (float) ((color.getBlue() + color.getGreen() + color.getRed()) / 3.0) * 255;
+                        pixelList[z++] = gray;
+                    }
+                }
+//                System.out.println(z);
+                trainFaceMat.put(countMat++, 0, pixelList);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println(trainFaceMat.toString());
+//        for (int i = 0; i < matRows; i++) {
+//            for (int j = 0; j < matCols; j++) {
+//                System.out.print(Arrays.toString(trainFaceMat.get(i, j)) + " ");
+//            }
+//            System.out.println("\n");
+//        }
+    }
+
+    /**
+     * 计算平均矩阵
+     */
+    public void getMeanFaceMat() {
+        meanFaceMat = new Mat(1, matRows, CV_32FC1);
+        int sum = 0, count = 0;
+        for (int i = 0; i < matRows; i++) {
+            sum = 0;
+            count = 0;
+            for (int j = 0; j < matCols; j++) {
+                int tf = (int) trainFaceMat.get(i, j)[0];
+                if (tf > 0) {
+                    sum += tf;
+                    count++;
+                }
+            }
+            int avg;
+            if (count > 0) {
+                avg = sum / count;
+            } else {
+                avg = 0;
+            }
+//            System.out.println("sum:" + sum + " count:" + count + " avg:" + avg);
+            meanFaceMat.put(0, i, avg);
+        }
+        for (int i = 0; i < matRows; i++) {
+            System.out.print(Arrays.toString(meanFaceMat.get(0, i)) + " ");
+        }
+    }
+
+
+    public void getNormTrainFaceMat() {
+        Mat normTrainFaceMat = new Mat(matRows, matCols, CV_32FC1);
+
     }
 
 }
