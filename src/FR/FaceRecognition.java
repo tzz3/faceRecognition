@@ -321,6 +321,7 @@ public class FaceRecognition {
             }
         }
         //获得训练样本的特征脸空间
+        // TODO: 2018/6/3 计算normTrainFaceMat转置矩阵  乘  eigenVectors 
 
 
         saveEigenVectors();
