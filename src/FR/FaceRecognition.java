@@ -289,6 +289,10 @@ public class FaceRecognition {
                 normTrainFaceMat.put(x, y, trainFaceMat.get(x, y)[0] - meanFaceMat.get(0, y)[0]);
             }
         }
+    }
+
+    //计算投影样本矩阵
+    public void calculateEigenTrain() {
         //计算特征值和特征向量
         eigenvalues = new Mat();//特征值
         eigenvectors = new Mat();//特征向量
@@ -329,8 +333,6 @@ public class FaceRecognition {
         eigenFace = new Mat();
         gemm(TnormTrainFaceMat, eigenvalues, 1, new Mat(), 0, eigenFace);//乘
         System.out.println(eigenFace.height() + " " + eigenFace.width());//2304*1
-//        System.out.println(eigenFace.dump());
-
         //训练样本在特征脸空间的投影
         eigenTrainSample = new Mat();
         System.out.println(normTrainFaceMat.height() + " " + normTrainFaceMat.width() + " " + eigenFace.height() + " " + eigenFace.width());
@@ -339,6 +341,7 @@ public class FaceRecognition {
 
         saveEigenVectors();
     }
+
 
     //保存特征向量
     public void saveEigenVectors() {

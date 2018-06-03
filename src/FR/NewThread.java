@@ -18,6 +18,7 @@ public class NewThread extends Thread {
         FR.getTrainFaceMat(imgList);
         FR.calMeanFaceMat();
         FR.calNormTrainFaceMat();
+        FR.calculateEigenTrain();
     }
 
     public void start() {
