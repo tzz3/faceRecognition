@@ -20,8 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.opencv.core.Core.eigen;
-import static org.opencv.core.Core.mulTransposed;
+import static org.opencv.core.Core.*;
 import static org.opencv.core.CvType.CV_32F;
 import static org.opencv.core.CvType.CV_32FC1;
 import static org.opencv.imgproc.Imgproc.INTER_LINEAR;
@@ -42,6 +41,8 @@ public class FaceRecognition {
     private int eigenRow;
     private int eigenCol;
     private String eigenFile = "eigenVectors";//特征向量保存文件地址
+    private Mat eigenFace = null;
+    private Mat eigenTrainSample = null;
 
 
     FaceRecognition() {
@@ -213,7 +214,7 @@ public class FaceRecognition {
                     fileArrayList.add(file);
                 }
             }
-            System.out.println(fileArrayList.toString());
+//            System.out.println(fileArrayList.toString());
         }
         return fileArrayList;
     }
@@ -225,7 +226,6 @@ public class FaceRecognition {
     public void getTrainFaceMat(ArrayList<File> arrayList) {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         matRows = arrayList.size();
-        System.out.println(matRows);
         arrayList.sort(File::compareTo);
         trainFaceMat = new Mat(matRows, matCols, CV_32FC1);
         int countMat = 0;
@@ -283,7 +283,7 @@ public class FaceRecognition {
     //计算特征向量和特征值
     public void calNormTrainFaceMat() {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        normTrainFaceMat = new Mat(matRows, matCols, CV_32FC1);
+        normTrainFaceMat = new Mat(matRows, matCols, CV_32FC1);//规格化样本矩阵
         for (int x = 0; x < matRows; x++) {
             for (int y = 0; y < matCols; y++) {
                 normTrainFaceMat.put(x, y, trainFaceMat.get(x, y)[0] - meanFaceMat.get(0, y)[0]);
@@ -303,6 +303,7 @@ public class FaceRecognition {
         for (int i = 0; i < eigenvalues.height(); i++) {
             ValuesSum += eigenvalues.get(i, 0)[0];
         }
+        System.out.println("ValuesSum:" + ValuesSum);
         // 前m个特征值大于90%
         double sum = 0;
         int m = 0;
@@ -313,6 +314,8 @@ public class FaceRecognition {
                 break;
             }
         }
+        System.out.println("Sum:" + sum);
+        System.out.println("m:" + m);
         //特征向量降维
         eigenVectors = new Mat(eigenRow, m, CV_32FC1);
         for (int i = 0; i < eigenRow; i++) {
@@ -321,8 +324,18 @@ public class FaceRecognition {
             }
         }
         //获得训练样本的特征脸空间
-        // TODO: 2018/6/3 计算normTrainFaceMat转置矩阵  乘  eigenVectors 
+        Mat TnormTrainFaceMat = new Mat();
+        transpose(normTrainFaceMat, TnormTrainFaceMat);
+        eigenFace = new Mat();
+        gemm(TnormTrainFaceMat, eigenvalues, 1, new Mat(), 0, eigenFace);//乘
+        System.out.println(eigenFace.height() + " " + eigenFace.width());//2304*1
+//        System.out.println(eigenFace.dump());
 
+        //训练样本在特征脸空间的投影
+        eigenTrainSample = new Mat();
+        System.out.println(normTrainFaceMat.height() + " " + normTrainFaceMat.width() + " " + eigenFace.height() + " " + eigenFace.width());
+        gemm(normTrainFaceMat, eigenFace, 1, new Mat(), 0, eigenTrainSample);//M*m   M*N   N*1
+        System.out.println(eigenTrainSample.height() + " " + eigenTrainSample.width());
 
         saveEigenVectors();
     }

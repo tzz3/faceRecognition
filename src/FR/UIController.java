@@ -18,7 +18,6 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 public class UIController {
@@ -36,6 +35,10 @@ public class UIController {
     private Pane pane_img1;
     @FXML
     private Button saveButton;
+    @FXML
+    private Button bt6;
+    @FXML
+    private ImageView imgView3_1;
 
     private File file = null;
     private Image image = null;
@@ -49,11 +52,18 @@ public class UIController {
     ArrayList<File> imgList = new ArrayList<>();
 
 
-    /***
-     * 选择图片
-     * @param actionEvent ActionEvent
-     */
-    public void selectFile(ActionEvent actionEvent) {
+    public void setImg1() {
+        selectPic();
+        img1.setImage(image);
+    }
+
+    public void setImgView3_1() {
+        selectPic();
+        imgView3_1.setImage(image);
+    }
+
+    //选择图片
+    public void selectPic() {
         clickCount = 0;
         final FileChooser filechooser = new FileChooser();
         String picDir = "C:\\Users\\tzz\\Desktop\\图像处理课程设计2018秋\\人脸测试库";
@@ -66,8 +76,7 @@ public class UIController {
                 String path = file.toURI().toURL().toString();
                 System.out.println(path);
                 image = new Image(path);
-                img1.setImage(image);
-            } catch (MalformedURLException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -198,11 +207,7 @@ public class UIController {
      * 样本训练
      */
     public void training() {
-//        FaceRecognition FR = new FaceRecognition();
-//        FR.getTrainFaceMat(imgList);
-//        FR.calMeanFaceMat();
-//        FR.calNormTrainFaceMat();
-        NewThread thread = new NewThread("training",imgList);
+        NewThread thread = new NewThread("training", imgList);
         thread.start();
     }
 
