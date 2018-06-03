@@ -198,10 +198,12 @@ public class UIController {
      * 样本训练
      */
     public void training() {
-        FaceRecognition FR = new FaceRecognition();
-        FR.getTrainFaceMat(imgList);
-        FR.cirMeanFaceMat();
-        FR.cirNormTrainFaceMat();
+//        FaceRecognition FR = new FaceRecognition();
+//        FR.getTrainFaceMat(imgList);
+//        FR.calMeanFaceMat();
+//        FR.calNormTrainFaceMat();
+        NewThread thread = new NewThread("training",imgList);
+        thread.start();
     }
 
 }
