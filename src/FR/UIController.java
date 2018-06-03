@@ -244,4 +244,8 @@ public class UIController {
         thread.start();
     }
 
+    public void recognition(){
+
+    }
+
 }

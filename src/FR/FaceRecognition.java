@@ -37,12 +37,15 @@ public class FaceRecognition {
     private int matCols = 48 * 48;//矩阵列 width x
     private Mat eigenvalues = null;//特征值
     private Mat eigenvectors = null;//特征向量
-    private Mat eigenVectors = null;
-    private int eigenRow;
-    private int eigenCol;
-    private String eigenFile = "eigenVectors";//特征向量保存文件地址
-    private Mat eigenFace = null;
-    private Mat eigenTrainSample = null;
+    private Mat eigenVectors = null;//降维后特征向量
+    private int eigenRow;//特征向量行数
+    private int eigenCol;//特征向量列数
+    private String vectorsFile = "eigenVectors";//特征向量保存文件地址
+    private String eigenFile = "eigenFace";
+    private Mat eigenFace = null;//样本的特征脸空间
+    private int eigenFaceRow;//行数
+    private int eigenFaceCol;//列数
+    private Mat eigenTrainSample = null;//投影样本矩阵
 
 
     FaceRecognition() {
@@ -247,13 +250,6 @@ public class FaceRecognition {
                 e.printStackTrace();
             }
         }
-//        System.out.println(trainFaceMat.toString());
-//        for (int i = 0; i < matRows; i++) {
-//            for (int j = 0; j < matCols; j++) {
-//                System.out.print(Arrays.toString(trainFaceMat.get(i, j)) + " ");
-//            }
-//            System.out.println();
-//        }
     }
 
     //计算平均矩阵
@@ -327,21 +323,51 @@ public class FaceRecognition {
                 eigenVectors.put(i, j, eigenvectors.get(i, j)[0] / Math.sqrt(eigenvalues.get(j, 0)[0]));
             }
         }
+        saveFile(eigenVectors, vectorsFile);
         //获得训练样本的特征脸空间
         Mat TnormTrainFaceMat = new Mat();
         transpose(normTrainFaceMat, TnormTrainFaceMat);
         eigenFace = new Mat();
         gemm(TnormTrainFaceMat, eigenvalues, 1, new Mat(), 0, eigenFace);//乘
-        System.out.println(eigenFace.height() + " " + eigenFace.width());//2304*1
+        eigenFaceRow = eigenFace.height();
+        eigenFaceCol = eigenFace.width();
+        saveFile(eigenFace, eigenFile);
         //训练样本在特征脸空间的投影
         eigenTrainSample = new Mat();
-        System.out.println(normTrainFaceMat.height() + " " + normTrainFaceMat.width() + " " + eigenFace.height() + " " + eigenFace.width());
+        System.out.println("normTrainFaceMat:" + normTrainFaceMat.height() + "*" + normTrainFaceMat.width() + "\neigenFaceMat:" + eigenFace.height() + "*" + eigenFace.width());
         gemm(normTrainFaceMat, eigenFace, 1, new Mat(), 0, eigenTrainSample);//M*m   M*N   N*1
-        System.out.println(eigenTrainSample.height() + " " + eigenTrainSample.width());
-
-        saveEigenVectors();
+        System.out.println("eigenTrainSample:" + eigenTrainSample.height() + "*" + eigenTrainSample.width());
     }
 
+    public void saveFile(Mat mat, String filename) {
+        try {
+            DataOutputStream outputStream = new DataOutputStream(new FileOutputStream(filename));
+            for (int i = 0; i < mat.height(); i++) {
+                for (int j = 0; j < mat.width(); j++) {
+                    outputStream.writeDouble(mat.get(i, j)[0]);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Mat readEigenFace() {
+        try {
+            DataInputStream inputStream = new DataInputStream(new FileInputStream(eigenFile));
+            eigenFace = new Mat(eigenFaceRow, eigenFaceCol, CV_32FC1);
+            for (int i = 0; i < eigenFaceRow; i++) {
+                for (int j = 0; j < eigenFaceCol; j++) {
+                    double d = inputStream.readDouble();
+                    eigenFace.put(i, j, d);
+                }
+            }
+            return eigenFace;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     //保存特征向量
     public void saveEigenVectors() {
@@ -360,20 +386,21 @@ public class FaceRecognition {
     //从文件读取特征向量
     public Mat readEigenVectors() {
         try {
-            DataInputStream inputStream = new DataInputStream(new FileInputStream(eigenFile));
-            eigenMat = new Mat(eigenRow, eigenCol, CV_32FC1);
+            DataInputStream inputStream = new DataInputStream(new FileInputStream(vectorsFile));
+            eigenVectors = new Mat(eigenRow, eigenCol, CV_32FC1);
             for (int i = 0; i < eigenRow; i++) {
                 for (int j = 0; j < eigenCol; j++) {
                     double d = inputStream.readDouble();
-                    eigenMat.put(i, j, d);
+                    eigenVectors.put(i, j, d);
                 }
             }
-            return eigenMat;
+            return eigenVectors;
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
     }
+
 
     //输出Mat矩阵
     public void outputMat(Mat mat) {
