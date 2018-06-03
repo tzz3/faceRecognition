@@ -38,6 +38,7 @@ public class FaceRecognition {
     private int matCols = 48 * 48;//矩阵列 width x
     private Mat eigenvalues = null;//特征值
     private Mat eigenvectors = null;//特征向量
+    private Mat eigenVectors = null;
     private int eigenRow;
     private int eigenCol;
     private String eigenFile = "eigenVectors";//特征向量保存文件地址
@@ -255,9 +256,7 @@ public class FaceRecognition {
 //        }
     }
 
-    /**
-     * 计算平均矩阵
-     */
+    //计算平均矩阵
     public void calMeanFaceMat() {
         meanFaceMat = new Mat(1, matCols, CV_32FC1);
         int sum = 0, count = 0;
@@ -281,7 +280,7 @@ public class FaceRecognition {
         }
     }
 
-
+    //计算特征向量和特征值
     public void calNormTrainFaceMat() {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         normTrainFaceMat = new Mat(matRows, matCols, CV_32FC1);
@@ -294,15 +293,40 @@ public class FaceRecognition {
         eigenvalues = new Mat();//特征值
         eigenvectors = new Mat();//特征向量
         Mat dst = new Mat();//转置矩阵
-
         mulTransposed(normTrainFaceMat, dst, false);//计算矩阵与转置矩阵点乘
         eigen(dst, eigenvalues, eigenvectors);
         eigenRow = eigenvectors.height();//400
         eigenCol = eigenvectors.width();//400
+        //eigenvalues.height()*eigenvalues.width()  400*1
+        //特征值求和
+        double ValuesSum = 0;
+        for (int i = 0; i < eigenvalues.height(); i++) {
+            ValuesSum += eigenvalues.get(i, 0)[0];
+        }
+        // 前m个特征值大于90%
+        double sum = 0;
+        int m = 0;
+        for (int i = 0; i < eigenvalues.height(); i++) {
+            sum += eigenvalues.get(i, 0)[0];
+            if (sum > ValuesSum * 0.9) {
+                m = i;
+                break;
+            }
+        }
+        //特征向量降维
+        eigenVectors = new Mat(eigenRow, m, CV_32FC1);
+        for (int i = 0; i < eigenRow; i++) {
+            for (int j = 0; j < m; j++) {
+                eigenVectors.put(i, j, eigenvectors.get(i, j)[0] / Math.sqrt(eigenvalues.get(j, 0)[0]));
+            }
+        }
+        //获得训练样本的特征脸空间
+
+
         saveEigenVectors();
     }
 
-
+    //保存特征向量
     public void saveEigenVectors() {
         try {
             DataOutputStream outputStream = new DataOutputStream(new FileOutputStream(eigenFile));
@@ -316,7 +340,8 @@ public class FaceRecognition {
         }
     }
 
-    public void readEigenVectors() {
+    //从文件读取特征向量
+    public Mat readEigenVectors() {
         try {
             DataInputStream inputStream = new DataInputStream(new FileInputStream(eigenFile));
             eigenMat = new Mat(eigenRow, eigenCol, CV_32FC1);
@@ -326,13 +351,14 @@ public class FaceRecognition {
                     eigenMat.put(i, j, d);
                 }
             }
-//            outputMat(eigenMat);
+            return eigenMat;
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
-
+    //输出Mat矩阵
     public void outputMat(Mat mat) {
         for (int i = 0; i < mat.height(); i++) {
             for (int j = 0; j < mat.width(); j++) {
