@@ -17,7 +17,7 @@
                         <Pane fx:id="pane1" prefHeight="200.0" prefWidth="200.0">
                             <children>
                                 <Button fx:id="bt1" layoutX="100.0" layoutY="30.0" mnemonicParsing="false" onAction="#setImg1" prefHeight="48.0" prefWidth="99.0" text="打开图像" />
-                                <Button fx:id="bt2" layoutX="246.0" layoutY="30.0" mnemonicParsing="false" onAction="#normalize" prefHeight="48.0" prefWidth="99.0" text="图像归一化" />
+                                <Button fx:id="bt2" layoutX="246.0" layoutY="30.0" mnemonicParsing="false" onAction="#setImg2" prefHeight="48.0" prefWidth="99.0" text="图像归一化" />
                                 <Pane fx:id="pane_img1" layoutX="76.0" layoutY="120.0">
                                     <children>
                                         <ImageView fx:id="img1" fitHeight="150.0" fitWidth="200.0" onMouseClicked="#onMouseClick" pickOnBounds="true" preserveRatio="true" />
@@ -48,10 +48,18 @@
                         <Pane prefHeight="200.0" prefWidth="200.0">
                             <children>
                                 <Button fx:id="bt6" layoutX="65.0" layoutY="30.0" mnemonicParsing="false" onAction="#setImgView3_1" prefHeight="48.0" prefWidth="99.0" text="打开图像" />
-                                <Button fx:id="bt7" layoutX="238.0" layoutY="30.0" mnemonicParsing="false" prefHeight="48.0" prefWidth="99.0" text="图像归一化" />
+                                <Button fx:id="bt7" layoutX="238.0" layoutY="30.0" mnemonicParsing="false" onAction="#setImgView3_2" prefHeight="48.0" prefWidth="99.0" text="图像归一化" />
                                 <Button fx:id="bt8" layoutX="424.0" layoutY="30.0" mnemonicParsing="false" prefHeight="48.0" prefWidth="99.0" text="图像识别" />
-                                <ImageView fx:id="imgView3_1" fitHeight="150.0" fitWidth="200.0" layoutX="15.0" layoutY="120.0" pickOnBounds="true" preserveRatio="true" />
-                                <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="237.0" layoutY="120.0" pickOnBounds="true" preserveRatio="true" />
+                        <Pane fx:id="pane3_1" layoutX="15.0" layoutY="120.0">
+                           <children>
+                                      <ImageView fx:id="imgView3_1" fitHeight="150.0" fitWidth="200.0" onMouseClicked="#onMouseClick" pickOnBounds="true" preserveRatio="true" />
+                           </children>
+                        </Pane>
+                        <Pane fx:id="pane3_2" layoutX="237.0" layoutY="120.0">
+                           <children>
+                                      <ImageView fx:id="imgView3_2" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
+                           </children>
+                        </Pane>
                             </children>
                         </Pane>
                     </content>

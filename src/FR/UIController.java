@@ -30,18 +30,18 @@ public class UIController {
     @FXML
     private ImageView img2;
     @FXML
-    private Pane pane1;
-    @FXML
     private Pane pane_img1;
     @FXML
-    private Button saveButton;
-    @FXML
-    private Button bt6;
+    private Pane pane3_1;
     @FXML
     private ImageView imgView3_1;
+    @FXML
+    private ImageView imgView3_2;
+
 
     private File file = null;
     private Image image = null;
+    private Image normalizeImg = null;
     private boolean click = false;
     private double p1_x;
     private double p1_y;
@@ -50,6 +50,7 @@ public class UIController {
     private int clickCount = 0;
     private ArrayList<Circle> circles = new ArrayList<>();
     ArrayList<File> imgList = new ArrayList<>();
+    private String imgView;
 
 
     public void setImg1() {
@@ -87,12 +88,16 @@ public class UIController {
      * @param event ActionEvent
      */
     public void onMouseClick(MouseEvent event) {
-        if (img1 != null && click) {
+        if ((img1 != null || imgView3_1 != null) && click) {
             clickCount++;
             Circle circle = new Circle(event.getX(), event.getY(), 3);
             circles.add(circle);
             circle.setFill(Color.RED);
-            pane_img1.getChildren().add(circle);
+            if (imgView.equals("img2")) {
+                pane_img1.getChildren().add(circle);
+            } else if (imgView.equals("imgView3_2")) {
+                pane3_1.getChildren().add(circle);
+            }
             if (clickCount >= 2) {
                 p2_x = event.getX();
                 p2_y = event.getY();
@@ -104,7 +109,15 @@ public class UIController {
 
                 double imgHeight = image.getHeight();
                 double imgWidth = image.getWidth();
-                double pw = pane_img1.getWidth(), ph = pane_img1.getHeight();//pane height width
+                //double pw = pane_img1.getWidth(), ph = pane_img1.getHeight();//pane height width
+                double pw = 0, ph = 0;
+                if (imgView.equals("img2")) {
+                    pw = pane_img1.getWidth();
+                    ph = pane_img1.getHeight();//pane height width
+                } else if (imgView.equals("imgView3_2")) {
+                    pw = pane3_1.getWidth();
+                    ph = pane3_1.getHeight();//pane height width
+                }
                 if (imgHeight > imgWidth) {
                     pw = imgWidth * ph / imgHeight;
                 } else {
@@ -137,19 +150,39 @@ public class UIController {
                 }
                 //从界面上删除选中点
                 for (Circle circle1 : circles) {
-                    pane_img1.getChildren().remove(circle1);
+                    if (imgView.equals("img2")) {
+                        pane_img1.getChildren().remove(circle1);
+                    } else if (imgView.equals("imgView3_2")) {
+                        pane3_1.getChildren().remove(circle1);
+                    }
                 }
 
                 FaceRecognition fr = new FaceRecognition();
-                Image img = fr.normalize(image, begin, end, zoom_multiples);
-                img2.setImage(img);
+                normalizeImg = fr.normalize(image, begin, end, zoom_multiples);
+                if (imgView.equals("img2")) {
+                    img2.setImage(normalizeImg);
+                } else if (imgView.equals("imgView3_2")) {
+                    imgView3_2.setImage(normalizeImg);
+                }
             } else {
                 p1_x = event.getX();
                 p1_y = event.getY();
             }
         }
-
     }
+
+    @FXML
+    public void setImg2() {
+        click = true;
+        imgView = "img2";
+    }
+
+    @FXML
+    public void setImgView3_2() {
+        click = true;
+        imgView = "imgView3_2";
+    }
+
 
     /**
      * 允许点击选点
