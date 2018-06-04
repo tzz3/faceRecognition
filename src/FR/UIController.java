@@ -124,7 +124,7 @@ public class UIController {
                     ph = pw * imgHeight / imgWidth;
                 }
 
-                double zoom_multiples = Math.sqrt(Math.pow((p1_x - p2_x) * imgWidth / pw, 2) + Math.pow((p1_y - p2_y) * imgHeight / ph, 2)) * 2 / 128;
+                double zoom_multiples = 48 / (Math.sqrt(Math.pow((p1_x - p2_x) * imgWidth / pw, 2) + Math.pow((p1_y - p2_y) * imgHeight / ph, 2)) * 2);
 
                 Point begin = new Point();
                 Point end = new Point();
@@ -236,16 +236,18 @@ public class UIController {
         }
     }
 
-    /**
-     * 样本训练
-     */
+    //样本训练
     public void training() {
         NewThread thread = new NewThread("training", imgList);
         thread.start();
     }
 
-    public void recognition(){
-
+    public void recognition() {
+        //normalizeImg
+        if (normalizeImg != null) {
+            FaceRecognition FR = new FaceRecognition();
+            FR.calTestFaceMat(normalizeImg);
+        }
     }
 
 }

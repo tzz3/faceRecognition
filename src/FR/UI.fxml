@@ -49,7 +49,7 @@
                             <children>
                                 <Button fx:id="bt6" layoutX="65.0" layoutY="30.0" mnemonicParsing="false" onAction="#setImgView3_1" prefHeight="48.0" prefWidth="99.0" text="打开图像" />
                                 <Button fx:id="bt7" layoutX="238.0" layoutY="30.0" mnemonicParsing="false" onAction="#setImgView3_2" prefHeight="48.0" prefWidth="99.0" text="图像归一化" />
-                                <Button fx:id="bt8" layoutX="424.0" layoutY="30.0" mnemonicParsing="false" prefHeight="48.0" prefWidth="99.0" text="图像识别" />
+                                <Button fx:id="bt8" layoutX="424.0" layoutY="30.0" mnemonicParsing="false" onAction="#recognition" prefHeight="48.0" prefWidth="99.0" text="图像识别" />
                         <Pane fx:id="pane3_1" layoutX="15.0" layoutY="120.0">
                            <children>
                                       <ImageView fx:id="imgView3_1" fitHeight="150.0" fitWidth="200.0" onMouseClicked="#onMouseClick" pickOnBounds="true" preserveRatio="true" />

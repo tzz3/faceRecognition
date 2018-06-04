@@ -10,7 +10,9 @@ public class RecognitionThread extends Thread {
 
     public void run() {
         FaceRecognition FR = new FaceRecognition();
-
+        FR.readEigenVectors();
+        FR.readEigenFace();
+        FR.calNormTrainFaceMat();
     }
 
 
