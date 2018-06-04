@@ -156,7 +156,6 @@ public class UIController {
                         pane3_1.getChildren().remove(circle1);
                     }
                 }
-
                 FaceRecognition fr = new FaceRecognition();
                 normalizeImg = fr.normalize(image, begin, end, zoom_multiples);
                 if (imgView.equals("img2")) {
@@ -242,9 +241,11 @@ public class UIController {
         thread.start();
     }
 
+    //人脸识别
     public void recognition() {
         //normalizeImg
         if (normalizeImg != null) {
+            imgView3_2.setImage(normalizeImg);
             FaceRecognition FR = new FaceRecognition();
             FR.calTestFaceMat(normalizeImg);
         }

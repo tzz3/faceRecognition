@@ -251,7 +251,7 @@ public class FaceRecognition {
                 for (int x = 0; x < image.getWidth(); x++) {
                     for (int y = 0; y < image.getHeight(); y++) {
                         Color color = pixelReader.getColor(x, y);
-                        float gray = (float) ((color.getBlue() + color.getGreen() + color.getRed()) / 3.0) * 255;
+                        float gray = (float) ((color.getBlue() + color.getGreen() + color.getRed()) / 3.0);
                         pixelList[z++] = gray;
                     }
                 }
@@ -264,26 +264,20 @@ public class FaceRecognition {
 
     //计算平均矩阵
     public void calMeanFaceMat() {
+//        outputMat(trainFaceMat);
         meanFaceMat = new Mat(1, matCols, CV_32FC1);
-        int sum = 0, count = 0;
+        double sum = 0;
         for (int c = 0; c < matCols; c++) {
             sum = 0;
-            count = 0;
             for (int r = 0; r < matRows; r++) {
-                int tf = (int) trainFaceMat.get(r, c)[0];
-                if (tf > 0) {
-                    sum += tf;
-                    count++;
-                }
+                double tf = trainFaceMat.get(r, c)[0];
+                sum += tf;
             }
-            int avg;
-            if (count > 0) {
-                avg = sum / count;
-            } else {
-                avg = 0;
-            }
+            double avg = sum / matRows;
+//            System.out.println("sum:" + sum + " avg:" + avg);
             meanFaceMat.put(0, c, avg);
         }
+//        outputMat(meanFaceMat);
         saveMatToFile(meanFaceMat, MFMFileName);
     }
 
@@ -291,6 +285,7 @@ public class FaceRecognition {
     public void calNormTrainFaceMat() {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         normTrainFaceMat = new Mat(matRows, matCols, CV_32FC1);//规格化样本矩阵
+//        outputMat(meanFaceMat);
         for (int x = 0; x < matRows; x++) {
             for (int y = 0; y < matCols; y++) {
                 normTrainFaceMat.put(x, y, trainFaceMat.get(x, y)[0] - meanFaceMat.get(0, y)[0]);
@@ -308,25 +303,27 @@ public class FaceRecognition {
                 testFaceMat.put(0, i * mat.width() + j, mat.get(i, j));
             }
         }
+        outputMat(testFaceMat);
         System.out.println("testFaceMat:" + testFaceMat.height() + "*" + testFaceMat.width());
         readMeanFaceMat();
+//        outputMat(meanFaceMat);
         System.out.println("meanFaceMat:" + meanFaceMat.height() + "*" + meanFaceMat.width());
-        Mat normTestFaceMat = new Mat(0, meanFaceMat.width(), CV_32FC1);
+        Mat normTestFaceMat = new Mat();
         subtract(testFaceMat, meanFaceMat, normTestFaceMat);
+//        System.out.println("normTestFaceMat:");
+////        outputMat(normTestFaceMat);
         Mat eigenTestSample = new Mat();
         readEigenFace();
         gemm(normTestFaceMat, eigenFace, 1, new Mat(), 0, eigenTestSample);
+        outputMat(eigenTestSample);
         double threshold = 0.7;
         double min = 0;
         int index = 0;
         readEigenTrainSample();
         System.out.println("eigenTrainSample:" + eigenTrainSample.height() + "*" + eigenTrainSample.width());
+        outputMat(eigenTrainSample);
         for (int i = 0; i < eigenTrainSample.height(); i++) {
-            double distance = 0;
-            for (int j = 0; j < eigenTrainSample.width(); j++) {
-                distance += Math.pow(eigenTrainSample.get(i, j)[0] - eigenTestSample.get(0, 0)[0], 2);
-            }
-            distance = Math.sqrt(distance);
+            double distance = Math.abs(eigenTrainSample.get(i, 0)[0] - eigenTestSample.get(0, 0)[0]);
             if (i == 0) {
                 min = distance;
             } else {
@@ -348,9 +345,10 @@ public class FaceRecognition {
         eigenvalues = new Mat();//特征值
         eigenvectors = new Mat();//特征向量
         Mat dst = new Mat();//转置矩阵
-        // TODO: 2018/6/4 保存样本与矩阵对应信息
         mulTransposed(normTrainFaceMat, dst, false);//计算矩阵与转置矩阵点乘
-        eigen(dst, eigenvalues, eigenvectors);
+        eigen(dst, eigenvalues, eigenvectors);//√
+//        outputMat(eigenvectors);
+//        outputMat(eigenvalues);
         eigenRow = eigenvectors.height();//400
         eigenCol = eigenvectors.width();//400
         //eigenvalues.height()*eigenvalues.width()  400*1
@@ -393,6 +391,7 @@ public class FaceRecognition {
         System.out.println("normTrainFaceMat:" + normTrainFaceMat.height() + "*" + normTrainFaceMat.width() + "\neigenFaceMat:" + eigenFace.height() + "*" + eigenFace.width());
         gemm(normTrainFaceMat, eigenFace, 1, new Mat(), 0, eigenTrainSample);//M*N * N*m -> M*m
         System.out.println("eigenTrainSample:" + eigenTrainSample.height() + "*" + eigenTrainSample.width());
+//        outputMat(eigenTrainSample);
         saveMatToFile(eigenTrainSample, eigenTrainSampleFile);
     }
 
