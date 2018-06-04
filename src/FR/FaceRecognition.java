@@ -117,7 +117,6 @@ public class FaceRecognition {
         return null;
     }
 
-
     /***
      * 图像缩放
      * @param image 源图像
@@ -154,12 +153,7 @@ public class FaceRecognition {
         return null;
     }
 
-
-    /***
-     * 直方图均衡化
-     * @param mat 图像矩阵
-     * @return 目标矩阵Mat
-     */
+    //直方图均衡化
     public Mat equalization(Mat mat) {
         mat.convertTo(mat, CvType.CV_8UC1, 255, 0);
         Mat dst = new Mat();
@@ -173,14 +167,7 @@ public class FaceRecognition {
         return dst;
     }
 
-    /***
-     * 图像灰度归一化
-     * @param image 源图像
-     * @param begin 起点坐标
-     * @param end 终点坐标
-     * @param zoom_multiples 缩放率
-     * @return 目标图像
-     */
+    //图像灰度归一化
     public Image normalize(Image image, Point begin, Point end, double zoom_multiples) {
         Image resizeImg = getResizeImg(image, begin, end, zoom_multiples);
         Mat mat = getGrayMatFromImg(resizeImg);
@@ -190,11 +177,7 @@ public class FaceRecognition {
         return getImgFromMat(eMat);
     }
 
-    /***
-     * 判断是否为图片
-     * @param file 输入File
-     * @return boolean
-     */
+    //判断是否为图片
     private static boolean isImage(File file) {
         boolean flag = false;
         try {
@@ -210,11 +193,7 @@ public class FaceRecognition {
         return flag;
     }
 
-    /***
-     * 获取所有图像文件名
-     * @param dir 文件夹名
-     * @return List
-     */
+    //获取所有图像文件名
     public static ArrayList<File> getImages(File dir) {
         File[] files = dir.listFiles();
         ArrayList<File> fileArrayList = new ArrayList<>();
@@ -229,14 +208,10 @@ public class FaceRecognition {
         return fileArrayList;
     }
 
-    /***
-     * 获取TrainFaceMat
-     * @param arrayList 所有图像文件
-     */
+    //获取TrainFaceMat
     public void getTrainFaceMat(ArrayList<File> arrayList) {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         matRows = arrayList.size();
-        arrayList.sort(File::compareTo);
         imgList = arrayList;
 //        System.out.println(imgList.toString());
         saveImgListToFile();
@@ -303,7 +278,7 @@ public class FaceRecognition {
                 testFaceMat.put(0, i * mat.width() + j, mat.get(i, j));
             }
         }
-        outputMat(testFaceMat);
+//        outputMat(testFaceMat);
         System.out.println("testFaceMat:" + testFaceMat.height() + "*" + testFaceMat.width());
         readMeanFaceMat();
 //        outputMat(meanFaceMat);
@@ -311,19 +286,24 @@ public class FaceRecognition {
         Mat normTestFaceMat = new Mat();
         subtract(testFaceMat, meanFaceMat, normTestFaceMat);
 //        System.out.println("normTestFaceMat:");
-////        outputMat(normTestFaceMat);
+//        outputMat(normTestFaceMat);
         Mat eigenTestSample = new Mat();
         readEigenFace();
         gemm(normTestFaceMat, eigenFace, 1, new Mat(), 0, eigenTestSample);
-        outputMat(eigenTestSample);
+//        outputMat(eigenTestSample);
         double threshold = 0.7;
         double min = 0;
         int index = 0;
         readEigenTrainSample();
         System.out.println("eigenTrainSample:" + eigenTrainSample.height() + "*" + eigenTrainSample.width());
-        outputMat(eigenTrainSample);
+//        outputMat(eigenTrainSample);
+        double distance = 0;
         for (int i = 0; i < eigenTrainSample.height(); i++) {
-            double distance = Math.abs(eigenTrainSample.get(i, 0)[0] - eigenTestSample.get(0, 0)[0]);
+            distance = 0;
+            for (int j = 0; j < eigenTrainSample.width(); j++) {
+                distance += Math.pow(eigenTrainSample.get(i, 0)[0] - eigenTestSample.get(0, 0)[0], 2);
+            }
+            distance = Math.sqrt(distance);
             if (i == 0) {
                 min = distance;
             } else {
@@ -392,10 +372,9 @@ public class FaceRecognition {
         System.out.println("normTrainFaceMat:" + normTrainFaceMat.height() + "*" + normTrainFaceMat.width() + "\neigenFaceMat:" + eigenFace.height() + "*" + eigenFace.width());
         gemm(normTrainFaceMat, eigenFace, 1, new Mat(), 0, eigenTrainSample);//M*N * N*m -> M*m
         System.out.println("eigenTrainSample:" + eigenTrainSample.height() + "*" + eigenTrainSample.width());
-        outputMat(eigenTrainSample);
+//        outputMat(eigenTrainSample);
         saveMatToFile(eigenTrainSample, eigenTrainSampleFile);
     }
-
 
     public void saveMatToFile(Mat mat, String filename) {
         try {
