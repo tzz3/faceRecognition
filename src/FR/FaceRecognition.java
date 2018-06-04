@@ -31,6 +31,7 @@ public class FaceRecognition {
     private Mat mat = null;
     private Mat eigenMat = null;
     private ArrayList<File> imgList = null;
+    private ArrayList<String> list = null;
     private Mat trainFaceMat = null;//样本训练矩阵
     private Mat meanFaceMat = null;//平均值矩阵
     private int MFMRow;
@@ -237,6 +238,7 @@ public class FaceRecognition {
         matRows = arrayList.size();
         arrayList.sort(File::compareTo);
         imgList = arrayList;
+//        System.out.println(imgList.toString());
         saveImgListToFile();
         trainFaceMat = new Mat(matRows, matCols, CV_32FC1);
         int countMat = 0;
@@ -335,8 +337,9 @@ public class FaceRecognition {
             }
         }
         System.out.println("index:" + index + " min:" + min);
-
-        System.out.println(imgList.get(index));
+        readImgList();
+        System.out.println(list.size());
+        System.out.println(list.get(index));
     }
 
     //计算投影样本矩阵
@@ -412,12 +415,32 @@ public class FaceRecognition {
 
     public void saveImgListToFile() {
         try {
-            DataOutputStream outputStream = new DataOutputStream(new FileOutputStream("ImgList"));
-            for (File anImgList : imgList) {
-                outputStream.writeChars(anImgList.getPath());
+            FileWriter fileWriter = new FileWriter("imgList");
+            BufferedWriter bw = new BufferedWriter(fileWriter);
+            for (File file : imgList) {
+                bw.write(file.getPath() + "\n");
             }
-            outputStream.close();
+            bw.close();
+            fileWriter.close();
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void readImgList() {
+        try {
+            InputStream is = new FileInputStream(new File("imgList"));
+            String line;
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            line = br.readLine();
+            list = new ArrayList<>();
+            while (line != null) {
+                list.add(line);
+                line = br.readLine();
+            }
+            br.close();
+            is.close();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
