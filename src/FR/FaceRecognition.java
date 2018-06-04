@@ -377,12 +377,13 @@ public class FaceRecognition {
                 eigenVectors.put(i, j, eigenvectors.get(i, j)[0] / Math.sqrt(eigenvalues.get(j, 0)[0]));
             }
         }
+//        outputMat(eigenVectors);
         saveMatToFile(eigenVectors, vectorsFile);
         //获得训练样本的特征脸空间
         Mat TnormTrainFaceMat = new Mat();
         transpose(normTrainFaceMat, TnormTrainFaceMat);
         eigenFace = new Mat();
-        gemm(TnormTrainFaceMat, eigenvalues, 1, new Mat(), 0, eigenFace);//乘
+        gemm(TnormTrainFaceMat, eigenVectors, 1, new Mat(), 0, eigenFace);//乘
         eigenFaceRow = eigenFace.height();//N
         eigenFaceCol = eigenFace.width();//m
         saveMatToFile(eigenFace, eigenFile);
@@ -391,7 +392,7 @@ public class FaceRecognition {
         System.out.println("normTrainFaceMat:" + normTrainFaceMat.height() + "*" + normTrainFaceMat.width() + "\neigenFaceMat:" + eigenFace.height() + "*" + eigenFace.width());
         gemm(normTrainFaceMat, eigenFace, 1, new Mat(), 0, eigenTrainSample);//M*N * N*m -> M*m
         System.out.println("eigenTrainSample:" + eigenTrainSample.height() + "*" + eigenTrainSample.width());
-//        outputMat(eigenTrainSample);
+        outputMat(eigenTrainSample);
         saveMatToFile(eigenTrainSample, eigenTrainSampleFile);
     }
 
