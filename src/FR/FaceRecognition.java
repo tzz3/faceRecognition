@@ -27,29 +27,18 @@ import static org.opencv.imgproc.Imgproc.INTER_LINEAR;
 import static org.opencv.imgproc.Imgproc.equalizeHist;
 
 public class FaceRecognition {
-    private Image image;
-    private Mat mat = null;
-    private Mat eigenMat = null;
     private ArrayList<File> imgList = null;
     private ArrayList<String> list = null;
     private Mat trainFaceMat = null;//样本训练矩阵
     private Mat meanFaceMat = null;//平均值矩阵
-    private int MFMRow;
-    private int MFMCol;
     private String MFMFileName = "meanFaceMat";
     private Mat normTrainFaceMat = null;//规格化训练样本矩阵
     private int matRows;//矩阵行 height y
     private int matCols = 48 * 48;//矩阵列 width x
-    private Mat eigenvalues = null;//特征值
-    private Mat eigenvectors = null;//特征向量
     private Mat eigenVectors = null;//降维后特征向量
-    private int eigenRow;//特征向量行数
-    private int eigenCol;//特征向量列数
     private String vectorsFile = "eigenVectors";//特征向量保存文件地址
     private String eigenFile = "eigenFace";
     private Mat eigenFace = null;//样本的特征脸空间
-    private int eigenFaceRow;//行数
-    private int eigenFaceCol;//列数
     private Mat eigenTrainSample = null;//投影样本矩阵
     private String eigenTrainSampleFile = "eigenTrainSample";
 
@@ -63,7 +52,7 @@ public class FaceRecognition {
      * @param image 源图像
      * @return 灰度Mat矩阵
      */
-    public Mat getGrayMatFromImg(Image image) {
+    private Mat getGrayMatFromImg(Image image) {
         if (image != null) {
             PixelReader pixelReader = image.getPixelReader();
             Mat matImage = new Mat((int) (image.getHeight()), (int) (image.getWidth()), CV_32F);
@@ -85,7 +74,7 @@ public class FaceRecognition {
      * @param matImg Mat矩阵
      * @return Img图像
      */
-    public Image getImgFromMat(Mat matImg) {
+    private Image getImgFromMat(Mat matImg) {
         if (matImg != null) {
             WritableImage wImage = new WritableImage(matImg.width(), matImg.height());
             //得到像素写入器
@@ -125,7 +114,7 @@ public class FaceRecognition {
      * @param zoom_multiples 缩放倍数
      * @return 图像Image
      */
-    public Image getResizeImg(Image image, Point begin, Point end, double zoom_multiples) {
+    private Image getResizeImg(Image image, Point begin, Point end, double zoom_multiples) {
 
         if (image != null) {
             PixelReader pixelReader = image.getPixelReader();
@@ -154,7 +143,7 @@ public class FaceRecognition {
     }
 
     //直方图均衡化
-    public Mat equalization(Mat mat) {
+    private Mat equalization(Mat mat) {
         mat.convertTo(mat, CvType.CV_8UC1, 255, 0);
         Mat dst = new Mat();
         List<Mat> mv = new ArrayList<>();
@@ -168,11 +157,9 @@ public class FaceRecognition {
     }
 
     //图像灰度归一化
-    public Image normalize(Image image, Point begin, Point end, double zoom_multiples) {
+    Image normalize(Image image, Point begin, Point end, double zoom_multiples) {
         Image resizeImg = getResizeImg(image, begin, end, zoom_multiples);
         Mat mat = getGrayMatFromImg(resizeImg);
-//        Image imgFromMat = getImgFromMat(mat);
-//        Mat cMat = getGrayMatFromImg(imgFromMat);
         Mat eMat = equalization(mat);
         return getImgFromMat(eMat);
     }
@@ -194,22 +181,52 @@ public class FaceRecognition {
     }
 
     //获取所有图像文件名
-    public static ArrayList<File> getImages(File dir) {
+    ArrayList<File> getImages(File dir, int picNum) {
         File[] files = dir.listFiles();
+        String dirPath = dir.getPath();
         ArrayList<File> fileArrayList = new ArrayList<>();
+//        System.out.println(files[0]);
         if (files != null) {
-            for (File file : files) {
-                if (file.isFile() && isImage(file)) {
-                    fileArrayList.add(file);
+            for (int i = 1; i <= files.length / picNum; i++) {
+                for (int j = 1; j <= picNum; j++) {
+                    fileArrayList.add(new File(dirPath + "/s" + i + "_" + j + ".bmp"));
                 }
             }
-//            System.out.println(fileArrayList.toString());
         }
         return fileArrayList;
     }
 
+    void getTrainFace(ArrayList<File> arrayList) {
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        matRows = arrayList.size();
+        imgList = arrayList;
+        saveImgListToFile();
+        trainFaceMat = new Mat(matRows, matCols, CV_32FC1);
+        int countMat = 0;
+        for (File file : arrayList) {
+            try {
+                Image image = new Image(file.toURI().toURL().toString());
+                Mat mat = getGrayMatFromImg(image);
+                System.out.println(file);
+                Mat eMat = equalization(mat);
+
+                int z = 0;
+                double[] gray = new double[(int) (image.getWidth() * image.getWidth())];
+                for (int x = 0; x < image.getWidth(); x++) {
+                    for (int y = 0; y < image.getHeight(); y++) {
+                        gray[z++] = eMat.get(x, y)[0];
+                    }
+                }
+                trainFaceMat.put(countMat++, 0, gray);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        }
+//        outputMat(trainFaceMat);
+    }
+
     //获取TrainFaceMat
-    public void getTrainFaceMat(ArrayList<File> arrayList) {
+    void getTrainFaceMat(ArrayList<File> arrayList) {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         matRows = arrayList.size();
         imgList = arrayList;
@@ -235,10 +252,11 @@ public class FaceRecognition {
                 e.printStackTrace();
             }
         }
+//        outputMat(trainFaceMat);
     }
 
     //计算平均矩阵
-    public void calMeanFaceMat() {
+    void calMeanFaceMat() {
 //        outputMat(trainFaceMat);
         meanFaceMat = new Mat(1, matCols, CV_32FC1);
         double sum = 0;
@@ -257,7 +275,7 @@ public class FaceRecognition {
     }
 
     //计算规格化样本矩阵
-    public void calNormTrainFaceMat() {
+    void calNormTrainFaceMat() {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         normTrainFaceMat = new Mat(matRows, matCols, CV_32FC1);//规格化样本矩阵
 //        outputMat(meanFaceMat);
@@ -269,7 +287,7 @@ public class FaceRecognition {
     }
 
     //识别比对
-    public void calTestFaceMat(Image normalizeImg) {
+    String calTestFaceMat(Image normalizeImg) {
         Mat mat = getGrayMatFromImg(normalizeImg);
         System.out.println("mat:" + mat.height() + "*" + mat.width());
         Mat testFaceMat = new Mat(1, mat.height() * mat.width(), CV_32FC1);
@@ -278,34 +296,32 @@ public class FaceRecognition {
                 testFaceMat.put(0, i * mat.width() + j, mat.get(i, j));
             }
         }
-//        outputMat(testFaceMat);
         System.out.println("testFaceMat:" + testFaceMat.height() + "*" + testFaceMat.width());
         readMeanFaceMat();
-//        outputMat(meanFaceMat);
         System.out.println("meanFaceMat:" + meanFaceMat.height() + "*" + meanFaceMat.width());
         Mat normTestFaceMat = new Mat();
         subtract(testFaceMat, meanFaceMat, normTestFaceMat);
-//        System.out.println("normTestFaceMat:");
-//        outputMat(normTestFaceMat);
+        System.out.println("normTestFaceMat:" + normTestFaceMat.height() + "*" + normTestFaceMat.width());
         Mat eigenTestSample = new Mat();
         readEigenFace();
         gemm(normTestFaceMat, eigenFace, 1, new Mat(), 0, eigenTestSample);
+        System.out.println("eigenTestSample:" + eigenTestSample.height() + "*" + eigenTestSample.width());
 //        outputMat(eigenTestSample);
         double threshold = 0.7;
         double min = 0;
         int index = 0;
         readEigenTrainSample();
         System.out.println("eigenTrainSample:" + eigenTrainSample.height() + "*" + eigenTrainSample.width());
-//        outputMat(eigenTrainSample);
         double distance = 0;
         for (int i = 0; i < eigenTrainSample.height(); i++) {
             distance = 0;
             for (int j = 0; j < eigenTrainSample.width(); j++) {
-                distance += Math.pow(eigenTrainSample.get(i, 0)[0] - eigenTestSample.get(0, 0)[0], 2);
+                distance += Math.pow(eigenTrainSample.get(i, j)[0] - eigenTestSample.get(0, j)[0], 2);
             }
             distance = Math.sqrt(distance);
             if (i == 0) {
                 min = distance;
+                index = 0;
             } else {
                 if (min > distance) {
                     min = distance;
@@ -317,20 +333,25 @@ public class FaceRecognition {
         readImgList();
         System.out.println(list.size());
         System.out.println(list.get(index));
+        return list.get(index);
     }
 
     //计算投影样本矩阵
-    public void calculateEigenTrain() {
+    void calculateEigenTrain() {
         //计算特征值和特征向量
-        eigenvalues = new Mat();//特征值
-        eigenvectors = new Mat();//特征向量
+        //特征值
+        Mat eigenvalues = new Mat();
+        //特征向量
+        Mat eigenvectors = new Mat();
         Mat dst = new Mat();//转置矩阵
         mulTransposed(normTrainFaceMat, dst, false);//计算矩阵与转置矩阵点乘
-        eigen(dst, eigenvalues, eigenvectors);//√
+        eigen(dst, eigenvalues, eigenvectors);//
 //        outputMat(eigenvectors);
 //        outputMat(eigenvalues);
-        eigenRow = eigenvectors.height();//400
-        eigenCol = eigenvectors.width();//400
+        //特征向量行数
+        int eigenRow = eigenvectors.height();
+        //特征向量列数
+        int eigenCol = eigenvectors.width();
         //eigenvalues.height()*eigenvalues.width()  400*1
         //特征值求和
         double ValuesSum = 0;
@@ -364,8 +385,10 @@ public class FaceRecognition {
         transpose(normTrainFaceMat, TnormTrainFaceMat);
         eigenFace = new Mat();
         gemm(TnormTrainFaceMat, eigenVectors, 1, new Mat(), 0, eigenFace);//乘
-        eigenFaceRow = eigenFace.height();//N
-        eigenFaceCol = eigenFace.width();//m
+        //行数
+        int eigenFaceRow = eigenFace.height();
+        //列数
+        int eigenFaceCol = eigenFace.width();
         saveMatToFile(eigenFace, eigenFile);
         //训练样本在特征脸空间的投影
         eigenTrainSample = new Mat();
@@ -376,7 +399,7 @@ public class FaceRecognition {
         saveMatToFile(eigenTrainSample, eigenTrainSampleFile);
     }
 
-    public void saveMatToFile(Mat mat, String filename) {
+    private void saveMatToFile(Mat mat, String filename) {
         try {
             DataOutputStream outputStream = new DataOutputStream(new FileOutputStream(filename));
             outputStream.writeInt(mat.height());
@@ -392,7 +415,7 @@ public class FaceRecognition {
         }
     }
 
-    public void saveImgListToFile() {
+    private void saveImgListToFile() {
         try {
             FileWriter fileWriter = new FileWriter("imgList");
             BufferedWriter bw = new BufferedWriter(fileWriter);
@@ -406,7 +429,7 @@ public class FaceRecognition {
         }
     }
 
-    public void readImgList() {
+    private void readImgList() {
         try {
             InputStream is = new FileInputStream(new File("imgList"));
             String line;
@@ -424,7 +447,7 @@ public class FaceRecognition {
         }
     }
 
-    public void readEigenTrainSample() {
+    private void readEigenTrainSample() {
         try {
             DataInputStream inputStream = new DataInputStream(new FileInputStream(eigenTrainSampleFile));
             int row = inputStream.readInt();
@@ -440,7 +463,7 @@ public class FaceRecognition {
         }
     }
 
-    public void readMeanFaceMat() {
+    private void readMeanFaceMat() {
         try {
             DataInputStream inputStream = new DataInputStream(new FileInputStream(MFMFileName));
             int row = inputStream.readInt();
@@ -456,7 +479,7 @@ public class FaceRecognition {
         }
     }
 
-    public void readEigenFace() {
+    void readEigenFace() {
         try {
             DataInputStream inputStream = new DataInputStream(new FileInputStream(eigenFile));
             int row = inputStream.readInt();
@@ -473,7 +496,7 @@ public class FaceRecognition {
     }
 
     //从文件读取特征向量
-    public void readEigenVectors() {
+    void readEigenVectors() {
         try {
             DataInputStream inputStream = new DataInputStream(new FileInputStream(vectorsFile));
             int row = inputStream.readInt();

@@ -37,30 +37,38 @@ public class UIController {
     private ImageView imgView3_1;
     @FXML
     private ImageView imgView3_2;
+    @FXML
+    private ImageView imgView3_3;
+    @FXML
+    private javafx.scene.control.Label label3_1;
+    @FXML
+    private javafx.scene.control.Label label3_2;
 
 
-    private File file = null;
     private Image image = null;
     private Image normalizeImg = null;
     private boolean click = false;
     private double p1_x;
     private double p1_y;
-    private double p2_x;
-    private double p2_y;
     private int clickCount = 0;
     private ArrayList<Circle> circles = new ArrayList<>();
-    ArrayList<File> imgList = new ArrayList<>();
+    private ArrayList<File> imgList = new ArrayList<>();
     private String imgView;
+    private int picNum = 9;//每组样本数量
+    private String imgPath;
 
 
     public void setImg1() {
         selectPic();
         img1.setImage(image);
+
     }
 
     public void setImgView3_1() {
         selectPic();
         imgView3_1.setImage(image);
+        String[] path = imgPath.split("/");
+        label3_1.setText(path[path.length - 1]);
     }
 
     //选择图片
@@ -70,13 +78,13 @@ public class UIController {
         String picDir = "C:\\Users\\tzz\\Desktop\\图像处理课程设计2018秋\\人脸测试库";
         filechooser.setInitialDirectory(new File(picDir));
         Stage stage = new Stage();
-        file = filechooser.showOpenDialog(stage);
+        File file = filechooser.showOpenDialog(stage);
         if (file != null) {
             System.out.println(file);
             try {
-                String path = file.toURI().toURL().toString();
-                System.out.println(path);
-                image = new Image(path);
+                imgPath = file.toURI().toURL().toString();
+                System.out.println(imgPath);
+                image = new Image(imgPath);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -99,8 +107,8 @@ public class UIController {
                 pane3_1.getChildren().add(circle);
             }
             if (clickCount >= 2) {
-                p2_x = event.getX();
-                p2_y = event.getY();
+                double p2_x = event.getX();
+                double p2_y = event.getY();
 
                 double distance = Math.sqrt(Math.pow((p1_x - p2_x), 2) + Math.pow((p1_y - p2_y), 2));
                 double x, y;
@@ -231,13 +239,23 @@ public class UIController {
         Stage stage = new Stage();
         File dir = directoryChooser.showDialog(stage);
         if (dir != null) {
-            imgList = FaceRecognition.getImages(dir);
+            FaceRecognition FR = new FaceRecognition();
+            imgList = FR.getImages(dir, picNum);
         }
+    }
+
+    public void setPicNum() {
+
     }
 
     //样本训练
     public void training() {
-        NewThread thread = new NewThread("training", imgList);
+        TrainThread thread = new TrainThread("training", imgList);
+        thread.start();
+    }
+
+    public void training2() {
+        TrainThread thread = new TrainThread("training2", imgList);
         thread.start();
     }
 
@@ -247,7 +265,11 @@ public class UIController {
         if (normalizeImg != null) {
             imgView3_2.setImage(normalizeImg);
             FaceRecognition FR = new FaceRecognition();
-            FR.calTestFaceMat(normalizeImg);
+            String result = FR.calTestFaceMat(normalizeImg);
+            String[] path = result.split("\\\\");
+            label3_2.setText(path[path.length - 1]);
+            System.out.println(result);
+            imgView3_3.setImage(new Image("file:/"+result));
         }
     }
 
