@@ -3,7 +3,11 @@ package FR;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -13,14 +17,20 @@ import javafx.scene.shape.Circle;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.videoio.VideoCapture;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class UIController {
+    @FXML
+    private Pane AnchorPane;
     @FXML
     private Button bt1;
     @FXML
@@ -40,10 +50,18 @@ public class UIController {
     @FXML
     private ImageView imgView3_3;
     @FXML
-    private javafx.scene.control.Label label3_1;
+    private Label label3_1;
     @FXML
-    private javafx.scene.control.Label label3_2;
+    private Label label3_2;
+    @FXML
+    private Label label4_1;
+    @FXML
+    private ImageView imgView4_1;
 
+    @FXML
+    private TextField text2_1_1;
+    @FXML
+    private Label label2_1_1;
 
     private Image image = null;
     private Image normalizeImg = null;
@@ -54,8 +72,9 @@ public class UIController {
     private ArrayList<Circle> circles = new ArrayList<>();
     private ArrayList<File> imgList = new ArrayList<>();
     private String imgView;
-    private int picNum = 9;//每组样本数量
+    private int picNum = 10;//每组样本数量
     private String imgPath;
+    Stage secondStage = null;
 
 
     public void setImg1() {
@@ -244,8 +263,27 @@ public class UIController {
         }
     }
 
-    public void setPicNum() {
+    public void openSecondStage() {
+        try {
+            secondStage = new Stage();
+            javafx.scene.layout.AnchorPane root1 = FXMLLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("FR/UI2.fxml")));
+            Scene secondScene = new Scene(root1);
+            secondStage.setTitle("设置");
+            secondStage.setScene(secondScene);
+            secondStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
+    public void setPicNum() {
+        try {
+            picNum = Integer.parseInt(text2_1_1.getText());
+            label2_1_1.setText("修改成功");
+        } catch (Exception e) {
+            label2_1_1.setText("输入错误");
+        }
+        System.out.println(picNum);
     }
 
     //样本训练
@@ -269,7 +307,22 @@ public class UIController {
             String[] path = result.split("\\\\");
             label3_2.setText(path[path.length - 1]);
             System.out.println(result);
-            imgView3_3.setImage(new Image("file:/"+result));
+            imgView3_3.setImage(new Image("file:/" + result));
+        }
+    }
+
+    public void takePhoto() {
+        VideoCapture camera = new VideoCapture();
+        camera.open(0);
+        if (!camera.isOpened()) {
+            System.out.println("error");
+        } else {
+            Mat frame = new Mat();
+            camera.read(frame);
+            Mat gray = new Mat(frame.rows(), frame.cols(), frame.type());
+            Imgproc.cvtColor(frame, gray, Imgproc.COLOR_RGB2GRAY);
+            FaceRecognition FR = new FaceRecognition();
+            imgView4_1.setImage(FR.getImgFromMat(gray));
         }
     }
 

@@ -41,7 +41,7 @@
                                     <contextMenu>
                                         <ContextMenu>
                                             <items>
-                                                <MenuItem mnemonicParsing="false" text="修改单样本训练数量" />
+                                                <MenuItem mnemonicParsing="false" onAction="#openSecondStage" text="修改单样本训练数量" />
                                             </items>
                                         </ContextMenu>
                                     </contextMenu>
@@ -89,6 +89,21 @@
                         </Pane>
                     </content>
                 </Tab>
+            <Tab text="图像采集">
+               <content>
+                  <Pane prefHeight="200.0" prefWidth="200.0">
+                     <children>
+                        <Label fx:id="label4_1" layoutX="14.0" layoutY="43.0" prefHeight="302.0" prefWidth="325.0" />
+                        <Pane layoutX="380.0" layoutY="51.0">
+                           <children>
+                              <ImageView fx:id="imgView4_1" fitHeight="287.0" fitWidth="308.0" pickOnBounds="true" preserveRatio="true" />
+                           </children>
+                        </Pane>
+                        <Button layoutX="105.0" layoutY="14.0" mnemonicParsing="false" onAction="#takePhoto" text="Button" />
+                     </children>
+                  </Pane>
+               </content>
+            </Tab>
             </tabs>
             <padding>
                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

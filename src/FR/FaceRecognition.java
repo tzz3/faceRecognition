@@ -52,7 +52,7 @@ public class FaceRecognition {
      * @param image 源图像
      * @return 灰度Mat矩阵
      */
-    private Mat getGrayMatFromImg(Image image) {
+    public Mat getGrayMatFromImg(Image image) {
         if (image != null) {
             PixelReader pixelReader = image.getPixelReader();
             Mat matImage = new Mat((int) (image.getHeight()), (int) (image.getWidth()), CV_32F);
@@ -74,7 +74,7 @@ public class FaceRecognition {
      * @param matImg Mat矩阵
      * @return Img图像
      */
-    private Image getImgFromMat(Mat matImg) {
+    public Image getImgFromMat(Mat matImg) {
         if (matImg != null) {
             WritableImage wImage = new WritableImage(matImg.width(), matImg.height());
             //得到像素写入器
@@ -347,7 +347,7 @@ public class FaceRecognition {
         mulTransposed(normTrainFaceMat, dst, false);//计算矩阵与转置矩阵点乘
         eigen(dst, eigenvalues, eigenvectors);//
 //        outputMat(eigenvectors);
-//        outputMat(eigenvalues);
+        outputMat(eigenvalues);
         //特征向量行数
         int eigenRow = eigenvectors.height();
         //特征向量列数
@@ -364,7 +364,7 @@ public class FaceRecognition {
         int m = 0;
         for (int i = 0; i < eigenvalues.height(); i++) {
             sum += eigenvalues.get(i, 0)[0];
-            if (sum > ValuesSum * 0.9) {
+            if (sum >= ValuesSum * 0.9) {
                 m = i;
                 break;
             }
@@ -396,6 +396,7 @@ public class FaceRecognition {
         gemm(normTrainFaceMat, eigenFace, 1, new Mat(), 0, eigenTrainSample);//M*N * N*m -> M*m
         System.out.println("eigenTrainSample:" + eigenTrainSample.height() + "*" + eigenTrainSample.width());
 //        outputMat(eigenTrainSample);
+        saveMatToTXTFile(eigenTrainSample, "eigenTrainSampleTXT.txt");
         saveMatToFile(eigenTrainSample, eigenTrainSampleFile);
     }
 
@@ -410,6 +411,23 @@ public class FaceRecognition {
                 }
             }
             outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveMatToTXTFile(Mat mat, String fileName) {
+        try {
+            FileWriter fileWriter = new FileWriter(fileName);
+            BufferedWriter bw = new BufferedWriter(fileWriter);
+            for (int i = 0; i < mat.height(); i++) {
+                for (int j = 0; j < mat.width(); j++) {
+                    bw.write(String.valueOf(mat.get(i, j)[0]) + " ");
+                }
+                bw.write("\n");
+            }
+            bw.close();
+            fileWriter.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

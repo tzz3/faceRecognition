@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="118.0" prefWidth="420.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="FR.UIController">
+   <children>
+      <Pane layoutX="21.0" layoutY="13.0" prefHeight="93.0" prefWidth="379.0">
+         <children>
+            <Label layoutX="89.0" layoutY="13.0" prefHeight="23.0" prefWidth="290.0" text="单样本训练个数（默认：9）：" />
+            <Button fx:id="button2_1_1" layoutX="307.0" layoutY="49.0" mnemonicParsing="false" onAction="#setPicNum" prefHeight="23.0" prefWidth="72.0" text="修改" />
+            <ImageView fitHeight="72.0" fitWidth="90.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@AlertDialog/AlertDialog.png" />
+               </image>
+            </ImageView>
+            <TextField fx:id="text2_1_1" layoutX="89.0" layoutY="49.0" prefHeight="23.0" prefWidth="195.0" promptText="9" />
+            <Label fx:id="label2_1_1" layoutX="89.0" layoutY="81.0" prefHeight="23.0" prefWidth="134.0" />
+         </children>
+      </Pane>
+   </children>
+</AnchorPane>
