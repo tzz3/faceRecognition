@@ -191,6 +191,7 @@ public class UIController {
                 }
                 FaceRecognition fr = new FaceRecognition();
                 normalizeImg = fr.normalize(image, begin, end, zoom_multiples);
+//                normalizeImg = fr.getImgFromMat(fr.equalization(fr.getGrayMatFromImg(normalizeImg)));
                 if (imgView.equals("img2")) {
                     img2.setImage(normalizeImg);
                 } else if (imgView.equals("imgView3_2")) {
@@ -339,8 +340,14 @@ public class UIController {
                 matrix.get(0, 0, data);
                 Image WritableImage = SwingFXUtils.toFXImage(bufferedImage, null);
                 Imgcodecs.imwrite("photo.bmp", matrix);
-                imgView3_1.setImage(WritableImage);//sanpshot.jpg
-                image = WritableImage;
+                //图片处理-》 未处理-》 直方均衡化
+                //图片 -》 直方均衡化
+                FaceRecognition FR = new FaceRecognition();
+                Mat mat = FR.getGrayMatFromImg(WritableImage);
+                Mat eMat = FR.equalization(mat);
+                Image img = FR.getImgFromMat(eMat);
+                imgView3_1.setImage(img);//sanpshot.jpg
+                image = img;
             }
         }
         capture.release();
