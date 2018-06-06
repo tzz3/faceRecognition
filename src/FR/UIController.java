@@ -78,9 +78,9 @@ public class UIController {
     private int clickCount = 0;
     private ArrayList<Circle> circles = new ArrayList<>();
     private ArrayList<File> imgList = new ArrayList<>();
-    private String imgView;
+    private String imgView = "";
     private int picNum = 9;//每组样本数量
-    private String imgPath;
+    private String imgPath = "";
 
 
     public void setImg1() {
@@ -113,6 +113,8 @@ public class UIController {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        } else {
+            imgPath = "";
         }
     }
 
@@ -306,7 +308,6 @@ public class UIController {
     //训练未处理图像集
     public void training2() throws InterruptedException {
         pb2_1.setProgress(0);
-
         TrainThread thread = new TrainThread("training2", imgList);
         thread.start();
         pb2_1.setProgress(1);
@@ -317,8 +318,10 @@ public class UIController {
         //normalizeImg
         if (normalizeImg != null) {
             imgView3_2.setImage(normalizeImg);
+//            imgView3_2.setImage(normalizeImg);
             FaceRecognition FR = new FaceRecognition();
-            String result = FR.calTestFaceMat(normalizeImg);
+//            String result = FR.calTestFaceMat(normalizeImg);
+            String result = FR.calLDATestSample(normalizeImg);//normalize
             String[] path = result.split("\\\\");
             label3_2.setText(path[path.length - 1]);
             System.out.println(result);
@@ -329,7 +332,6 @@ public class UIController {
 
     public void takePhoto() {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        CameraBasic cameraBasic = new CameraBasic();
         CameraBasic.photo();
         VideoCapture capture = new VideoCapture(0);
         Mat matrix = new Mat();

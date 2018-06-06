@@ -42,6 +42,7 @@ public class FaceRecognition {
     private Mat eigenTrainSample = null;//投影样本矩阵
     private String eigenTrainSampleFile = "eigenTrainSample";
     private Mat classMat = null;
+    private Mat ldaTrainSample = null;
 
 
     FaceRecognition() {
@@ -292,7 +293,7 @@ public class FaceRecognition {
         }
     }
 
-    //识别比对
+    //PCA识别比对
     String calTestFaceMat(Image normalizeImg) {
         Mat mat = getGrayMatFromImg(normalizeImg);
         System.out.println("mat:" + mat.height() + "*" + mat.width());
@@ -406,6 +407,65 @@ public class FaceRecognition {
         saveMatToFile(eigenTrainSample, eigenTrainSampleFile);
     }
 
+    //LDA识别对比
+    public String calLDATestSample(Image normalizeImg) {
+        Mat mat = getGrayMatFromImg(normalizeImg);
+        System.out.println("mat:" + mat.height() + "*" + mat.width());
+        Mat testFaceMat = new Mat(1, mat.height() * mat.width(), CV_32FC1);
+        for (int i = 0; i < mat.height(); i++) {
+            for (int j = 0; j < mat.width(); j++) {
+                testFaceMat.put(0, i * mat.width() + j, mat.get(i, j));
+            }
+        }
+        System.out.println("testFaceMat:" + testFaceMat.height() + "*" + testFaceMat.width());
+        readMeanFaceMat();
+        System.out.println("meanFaceMat:" + meanFaceMat.height() + "*" + meanFaceMat.width());
+        Mat normTestFaceMat = new Mat();
+        subtract(testFaceMat, meanFaceMat, normTestFaceMat);
+        System.out.println("normTestFaceMat:" + normTestFaceMat.height() + "*" + normTestFaceMat.width());
+        Mat eigenTestSample = new Mat();
+        readEigenFace();
+        gemm(normTestFaceMat, eigenFace, 1, new Mat(), 0, eigenTestSample);
+        System.out.println("eigenTestSample:" + eigenTestSample.height() + "*" + eigenTestSample.width());
+//        outputMat(eigenTestSample);
+        //测试人脸在LDA投影空间上进行投影
+        Mat ldaTestSample = new Mat();
+        Mat ldaeigenVectors = readMatFromFile("ldaeigenVectors");
+        System.out.println("ldaeigenVectors:" + ldaeigenVectors.height() + "*" + ldaeigenVectors.width());
+//        outputMat(ldaeigenVectors);
+        gemm(eigenTestSample, ldaeigenVectors, 1, new Mat(), 0, ldaTestSample);
+        System.out.println("ldaTestSample:" + ldaTestSample.height() + "*" + ldaTestSample.width());
+        //计算欧式距离
+        double threshold = 0.7;
+        readLDATrainSample();
+//        outputMat(ldaTestSample);
+        System.out.println("ldaTrainSample:" + ldaTrainSample.height() + "*" + ldaTrainSample.width());
+        double min = 0;
+        int index = 0;
+        double distance = 0;
+        for (int i = 0; i < ldaTrainSample.height(); i++) {
+            distance = 0;
+            for (int j = 0; j < ldaTrainSample.width(); j++) {
+                distance += Math.pow(ldaTrainSample.get(i, j)[0] - ldaTestSample.get(0, j)[0], 2);
+            }
+            distance = Math.sqrt(distance);
+            if (i == 0) {
+                min = distance;
+                index = 0;
+            } else {
+                if (min > distance) {
+                    min = distance;
+                    index = i;
+                }
+            }
+        }
+        System.out.println("index:" + index + " min:" + min);
+        readImgList();
+        System.out.println(list.size());
+        System.out.println(list.get(index));
+        return list.get(index);
+    }
+
     public void LDA() {
         //计算eigenTrainSample 均值
         readEigenTrainSample();
@@ -426,12 +486,13 @@ public class FaceRecognition {
             u.put(0, j, avg);
         }
         System.out.println("U:");
-        outputMat(u);
+//        outputMat(u);
         //计算类均值人脸
         readClassMat();
 //        outputMat(classMat);
         int c = (int) classMat.get(classMat.height() - 1, 0)[0];
-        Mat ui = new Mat(c, etsWidth, CV_32FC1);
+        System.out.println("c:" + c);
+        Mat ui = new Mat(c, m, CV_32FC1);
         int now = (int) classMat.get(0, 0)[0];
         double[] sum = new double[etsWidth];
         int num = 1;
@@ -471,12 +532,13 @@ public class FaceRecognition {
         for (int i = 0; i < c; i++) {
             Mat dst = new Mat();
             subtract(u, ui.row(i), dst);
+//            outputMat(dst);
             Mat m2 = new Mat();
             transpose(dst, dst);
             mulTransposed(dst, m2, false);
             add(Sb, m2, Sb);
         }
-//        outputMat(Sb);
+//        outputMat(Sb);//√
 //        System.out.println("\n\n");
         //计算类内离散度矩阵
         Mat Sw = new Mat(m, m, CV_32FC1);
@@ -485,6 +547,7 @@ public class FaceRecognition {
             for (int j = 0; j < num; j++) {
                 Mat dst = new Mat();
                 subtract(eigenTrainSample.row(i * num + j), ui.row(i), dst);
+//                outputMat(dst);
                 transpose(dst, dst);
                 Mat m2 = new Mat();
                 mulTransposed(dst, m2, false);
@@ -492,32 +555,29 @@ public class FaceRecognition {
             }
             add(Sw, w, Sw);
         }
-//        outputMat(Sw);
+//        outputMat(Sw);//√
         //计算Sb -1Sw矩阵的特征值和特征向量
         Mat Sw1 = new Mat();
         Core.invert(Sw, Sw1);
-//        outputMat(Sw1);
+//        outputMat(Sw1);//√
+        System.out.println("Sw1:" + Sw1.height() + "*" + Sw1.width());
         Mat ldaEigenValues = new Mat();
         Mat ldaEigenVectors = new Mat();
         Mat dst = new Mat();
         gemm(Sw1, Sb, 1, new Mat(), 0, dst);
-//        outputMat(dst);
+//        outputMat(dst);//√
         eigen(dst, ldaEigenValues, ldaEigenVectors);
         System.out.println("ldaEigenVectors:" + ldaEigenVectors.height() + "*" + ldaEigenVectors.width());
         System.out.println("ldaEigenValues:" + ldaEigenValues.height() + "*" + ldaEigenValues.width());
-        outputMat(ldaEigenVectors);
-//        outputMat(ldaEigenValues);
+//        outputMat(ldaEigenVectors);
+//        outputMat(ldaEigenValues);//√
         //对特征空间降维
-        double valueSum = 0;
         int t = 0;
         for (int i = 0; i < ldaEigenValues.height(); i++) {
-            valueSum += ldaEigenValues.get(i, 0)[0];
-        }
-        double value = 0;
-        for (int i = 0; i < ldaEigenValues.height(); i++) {
-            value += ldaEigenValues.get(i, 0)[0];
-            if (value >= valueSum * 0.9) {
+            if (ldaEigenValues.get(i, 0)[0] > 0) {
                 t = i;
+            } else {
+                break;
             }
         }
         Mat ldaeigenVectors = new Mat(ldaEigenVectors.height(), t, CV_32FC1);
@@ -526,9 +586,14 @@ public class FaceRecognition {
                 ldaeigenVectors.put(i, j, ldaEigenVectors.get(i, j)[0] / Math.sqrt(ldaEigenValues.get(j, 0)[0]));
             }
         }
-        System.out.println(t);
-        outputMat(ldaeigenVectors);
-
+        System.out.println("t:" + t);
+        saveMatToFile(ldaeigenVectors, "ldaeigenVectors");
+//        outputMat(ldaeigenVectors);
+        ldaTrainSample = new Mat();
+        readEigenTrainSample();
+        gemm(eigenTrainSample, ldaeigenVectors, 1, new Mat(), 0, ldaTrainSample);
+//        outputMat(ldaTrainSample);
+        saveMatToFile(ldaTrainSample, "ldaTrainSample");
     }
 
     private void saveMatToFile(Mat mat, String filename) {
@@ -578,6 +643,24 @@ public class FaceRecognition {
         }
     }
 
+    private Mat readMatFromFile(String fileName) {
+        try {
+            DataInputStream inputStream = new DataInputStream(new FileInputStream(fileName));
+            int row = inputStream.readInt();
+            int col = inputStream.readInt();
+            Mat mat = new Mat(row, col, CV_32FC1);
+            for (int i = 0; i < row; i++) {
+                for (int j = 0; j < col; j++) {
+                    mat.put(i, j, inputStream.readDouble());
+                }
+            }
+            return mat;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     private void readImgList() {
         try {
             InputStream is = new FileInputStream(new File("imgList"));
@@ -605,6 +688,22 @@ public class FaceRecognition {
             for (int i = 0; i < row; i++) {
                 for (int j = 0; j < col; j++) {
                     classMat.put(i, j, inputStream.readDouble());
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void readLDATrainSample() {
+        try {
+            DataInputStream inputStream = new DataInputStream(new FileInputStream("ldaTrainSample"));
+            int row = inputStream.readInt();
+            int col = inputStream.readInt();
+            ldaTrainSample = new Mat(row, col, CV_32FC1);
+            for (int i = 0; i < row; i++) {
+                for (int j = 0; j < col; j++) {
+                    ldaTrainSample.put(i, j, inputStream.readDouble());
                 }
             }
         } catch (IOException e) {
