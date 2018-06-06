@@ -23,6 +23,7 @@ public class TrainThread extends Thread {
         FR.calMeanFaceMat();
         FR.calNormTrainFaceMat();
         FR.calculateEigenTrain();
+        FR.LDA();
     }
 
     public void start() {

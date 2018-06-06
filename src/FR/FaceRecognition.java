@@ -41,6 +41,7 @@ public class FaceRecognition {
     private Mat eigenFace = null;//样本的特征脸空间
     private Mat eigenTrainSample = null;//投影样本矩阵
     private String eigenTrainSampleFile = "eigenTrainSample";
+    private Mat classMat = null;
 
 
     FaceRecognition() {
@@ -187,9 +188,11 @@ public class FaceRecognition {
         ArrayList<File> fileArrayList = new ArrayList<>();
 //        System.out.println(files[0]);
         if (files != null) {
+            classMat = new Mat(files.length, 1, CV_32FC1);
             for (int i = 1; i <= files.length / picNum; i++) {
                 for (int j = 1; j <= picNum; j++) {
                     fileArrayList.add(new File(dirPath + "/s" + i + "_" + j + ".bmp"));
+                    classMat.put((i - 1) * picNum + j - 1, i);
                 }
             }
         }
@@ -237,6 +240,7 @@ public class FaceRecognition {
         for (File file : arrayList) {
             try {
                 Image image = new Image(file.toURI().toURL().toString());
+                System.out.println(file);
                 PixelReader pixelReader = image.getPixelReader();
                 double[] pixelList = new double[(int) (image.getWidth() * image.getHeight())];
                 int z = 0;
@@ -347,7 +351,7 @@ public class FaceRecognition {
         mulTransposed(normTrainFaceMat, dst, false);//计算矩阵与转置矩阵点乘
         eigen(dst, eigenvalues, eigenvectors);//
 //        outputMat(eigenvectors);
-        outputMat(eigenvalues);
+//        outputMat(eigenvalues);
         //特征向量行数
         int eigenRow = eigenvectors.height();
         //特征向量列数
@@ -398,6 +402,30 @@ public class FaceRecognition {
 //        outputMat(eigenTrainSample);
         saveMatToTXTFile(eigenTrainSample, "eigenTrainSampleTXT.txt");
         saveMatToFile(eigenTrainSample, eigenTrainSampleFile);
+    }
+
+    public void LDA() {
+        //计算eigenTrainSample 均值
+        readEigenTrainSample();
+//        outputMat(eigenTrainSample);
+        int etsHeight = eigenTrainSample.height();
+        int etsWidth = eigenTrainSample.width();
+        System.out.println(etsHeight + "*" + etsWidth);
+        Mat u = new Mat(1, etsWidth, CV_32FC1);//1*m
+        double avg = 0;
+        for (int j = 0; j < etsWidth; j++) {
+            avg = 0;
+            for (int i = 0; i < etsHeight; i++) {
+                avg += eigenTrainSample.get(i, j)[0];
+            }
+//            System.out.println("avg:" + avg);
+            avg = avg / etsHeight;
+            u.put(0, j, avg);
+        }
+        System.out.println("U:");
+        outputMat(u);
+        //计算类均值人脸
+
     }
 
     private void saveMatToFile(Mat mat, String filename) {

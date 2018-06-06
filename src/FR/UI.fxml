@@ -65,7 +65,14 @@
                     <content>
                         <Pane prefHeight="200.0" prefWidth="200.0">
                             <children>
-                                <Button fx:id="bt6" layoutX="91.0" layoutY="30.0" mnemonicParsing="false" onAction="#setImgView3_1" prefHeight="48.0" prefWidth="99.0" text="打开图像" />
+                                <Button fx:id="bt6" layoutX="91.0" layoutY="30.0" mnemonicParsing="false" onAction="#setImgView3_1" prefHeight="48.0" prefWidth="99.0" text="打开图像">
+                           <contextMenu>
+                              <ContextMenu>
+                                <items>
+                                  <MenuItem mnemonicParsing="false" onAction="#takePhoto" text="拍照" />
+                                </items>
+                              </ContextMenu>
+                           </contextMenu></Button>
                                 <Button fx:id="bt7" layoutX="311.0" layoutY="30.0" mnemonicParsing="false" onAction="#setImgView3_2" prefHeight="48.0" prefWidth="99.0" text="图像归一化" />
                                 <Button fx:id="bt8" layoutX="526.0" layoutY="30.0" mnemonicParsing="false" onAction="#recognition" prefHeight="48.0" prefWidth="99.0" text="图像识别" />
                                 <Pane fx:id="pane3_1" layoutX="41.0" layoutY="119.0">
@@ -89,21 +96,6 @@
                         </Pane>
                     </content>
                 </Tab>
-            <Tab text="图像采集">
-               <content>
-                  <Pane prefHeight="200.0" prefWidth="200.0">
-                     <children>
-                        <Label fx:id="label4_1" layoutX="14.0" layoutY="43.0" prefHeight="302.0" prefWidth="325.0" />
-                        <Pane layoutX="380.0" layoutY="51.0">
-                           <children>
-                              <ImageView fx:id="imgView4_1" fitHeight="287.0" fitWidth="308.0" pickOnBounds="true" preserveRatio="true" />
-                           </children>
-                        </Pane>
-                        <Button layoutX="105.0" layoutY="14.0" mnemonicParsing="false" onAction="#takePhoto" text="Button" />
-                     </children>
-                  </Pane>
-               </content>
-            </Tab>
             </tabs>
             <padding>
                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

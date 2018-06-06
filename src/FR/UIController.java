@@ -7,6 +7,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -17,12 +18,16 @@ import javafx.scene.shape.Circle;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.videoio.VideoCapture;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,6 +62,8 @@ public class UIController {
     private Label label4_1;
     @FXML
     private ImageView imgView4_1;
+    @FXML
+    private ProgressBar pb2_1;
 
     @FXML
     private TextField text2_1_1;
@@ -72,9 +79,8 @@ public class UIController {
     private ArrayList<Circle> circles = new ArrayList<>();
     private ArrayList<File> imgList = new ArrayList<>();
     private String imgView;
-    private int picNum = 10;//每组样本数量
+    private int picNum = 9;//每组样本数量
     private String imgPath;
-    Stage secondStage = null;
 
 
     public void setImg1() {
@@ -257,15 +263,17 @@ public class UIController {
         directoryChooser.setInitialDirectory(new File("C:\\Users\\tzz\\Desktop\\图像处理课程设计2018秋"));
         Stage stage = new Stage();
         File dir = directoryChooser.showDialog(stage);
+        System.out.println(picNum);
         if (dir != null) {
             FaceRecognition FR = new FaceRecognition();
             imgList = FR.getImages(dir, picNum);
+            pb2_1.setProgress(1);
         }
     }
 
     public void openSecondStage() {
         try {
-            secondStage = new Stage();
+            Stage secondStage = new Stage();
             javafx.scene.layout.AnchorPane root1 = FXMLLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("FR/UI2.fxml")));
             Scene secondScene = new Scene(root1);
             secondStage.setTitle("设置");
@@ -287,14 +295,20 @@ public class UIController {
     }
 
     //样本训练
-    public void training() {
+    public void training() throws InterruptedException {
+        pb2_1.setProgress(0);
         TrainThread thread = new TrainThread("training", imgList);
         thread.start();
+        pb2_1.setProgress(1);
     }
 
-    public void training2() {
+    //训练未处理图像集
+    public void training2() throws InterruptedException {
+        pb2_1.setProgress(0);
+
         TrainThread thread = new TrainThread("training2", imgList);
         thread.start();
+        pb2_1.setProgress(1);
     }
 
     //人脸识别
@@ -312,18 +326,24 @@ public class UIController {
     }
 
     public void takePhoto() {
-        VideoCapture camera = new VideoCapture();
-        camera.open(0);
-        if (!camera.isOpened()) {
-            System.out.println("error");
-        } else {
-            Mat frame = new Mat();
-            camera.read(frame);
-            Mat gray = new Mat(frame.rows(), frame.cols(), frame.type());
-            Imgproc.cvtColor(frame, gray, Imgproc.COLOR_RGB2GRAY);
-            FaceRecognition FR = new FaceRecognition();
-            imgView4_1.setImage(FR.getImgFromMat(gray));
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        VideoCapture capture = new VideoCapture(0);
+        Mat matrix = new Mat();
+        capture.read(matrix);
+        if (capture.isOpened()) {
+            if (capture.read(matrix)) {
+                BufferedImage bufferedImage = new BufferedImage(matrix.width(), matrix.height(), BufferedImage.TYPE_3BYTE_BGR);
+                WritableRaster raster = bufferedImage.getRaster();
+                DataBufferByte dataBuffer = (DataBufferByte) raster.getDataBuffer();
+                byte[] data = dataBuffer.getData();
+                matrix.get(0, 0, data);
+                Image WritableImage = SwingFXUtils.toFXImage(bufferedImage, null);
+                Imgcodecs.imwrite("photo.bmp", matrix);
+                imgView3_1.setImage(WritableImage);//sanpshot.jpg
+                image = WritableImage;
+            }
         }
+        capture.release();
     }
 
 }
