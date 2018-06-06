@@ -326,8 +326,11 @@ public class UIController {
         }
     }
 
+
     public void takePhoto() {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        CameraBasic cameraBasic = new CameraBasic();
+        CameraBasic.photo();
         VideoCapture capture = new VideoCapture(0);
         Mat matrix = new Mat();
         capture.read(matrix);
