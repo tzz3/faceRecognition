@@ -162,8 +162,10 @@ public class FaceRecognition {
     Image normalize(Image image, Point begin, Point end, double zoom_multiples) {
         Image resizeImg = getResizeImg(image, begin, end, zoom_multiples);
         Mat mat = getGrayMatFromImg(resizeImg);
-        Mat eMat = equalization(mat);
-        return getImgFromMat(eMat);
+//        Mat eMat = equalization(mat);
+//        return getImgFromMat(eMat);
+        return getImgFromMat(mat);
+//        return resizeImg;
     }
 
     //判断是否为图片
@@ -189,6 +191,7 @@ public class FaceRecognition {
         ArrayList<File> fileArrayList = new ArrayList<>();
 //        System.out.println(files[0]);
         if (files != null) {
+            System.out.println(files.length);
             classMat = new Mat(files.length, 1, CV_32FC1);
             for (int i = 1; i <= files.length / picNum; i++) {
                 for (int j = 1; j <= picNum; j++) {

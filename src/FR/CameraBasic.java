@@ -66,9 +66,10 @@ class CameraBasic {
      * Initialize the contents of the frame.
      */
     private void initialize() {
+        flag = 0;
         frame = new JFrame();
         frame.setBounds(100, 100, 800, 600);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//WindowConstants.EXIT_ON_CLOSE
         frame.getContentPane().setLayout(null);
 
         JButton btnNewButton = new JButton("\u62CD\u7167");

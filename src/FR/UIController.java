@@ -193,6 +193,11 @@ public class UIController {
                 }
                 FaceRecognition fr = new FaceRecognition();
                 normalizeImg = fr.normalize(image, begin, end, zoom_multiples);
+                
+//                Mat src = fr.getGrayMatFromImg(image);
+//                Mat dst = new Mat();
+//                Imgproc.resize(src, dst, new Size(48, 48), 0, 0, INTER_LINEAR);
+//                normalizeImg = fr.getImgFromMat(dst);
 //                normalizeImg = fr.getImgFromMat(fr.equalization(fr.getGrayMatFromImg(normalizeImg)));
                 if (imgView.equals("img2")) {
                     img2.setImage(normalizeImg);
@@ -317,11 +322,14 @@ public class UIController {
     public void recognition() {
         //normalizeImg
         if (normalizeImg != null) {
-            imgView3_2.setImage(normalizeImg);
 //            imgView3_2.setImage(normalizeImg);
             FaceRecognition FR = new FaceRecognition();
+            Mat mat = FR.getGrayMatFromImg(normalizeImg);
+            Mat eMat = FR.equalization(mat);
+            Image image = FR.getImgFromMat(eMat);
 //            String result = FR.calTestFaceMat(normalizeImg);
-            String result = FR.calLDATestSample(normalizeImg);//normalize
+
+            String result = FR.calLDATestSample(image);//normalize
             String[] path = result.split("\\\\");
             label3_2.setText(path[path.length - 1]);
             System.out.println(result);
@@ -347,12 +355,15 @@ public class UIController {
                 Imgcodecs.imwrite("photo.bmp", matrix);
                 //图片处理-》 未处理-》 直方均衡化
                 //图片 -》 直方均衡化
-                FaceRecognition FR = new FaceRecognition();
-                Mat mat = FR.getGrayMatFromImg(WritableImage);
-                Mat eMat = FR.equalization(mat);
-                Image img = FR.getImgFromMat(eMat);
-                imgView3_1.setImage(img);//sanpshot.jpg
-                image = img;
+//                FaceRecognition FR = new FaceRecognition();
+//                Mat mat = FR.getGrayMatFromImg(WritableImage);
+//                Mat eMat = FR.equalization(mat);
+//                Image img = FR.getImgFromMat(eMat);
+//                normalizeImg = img;
+//                imgView3_1.setImage(img);//sanpshot.jpg
+//                image = img;
+                image = WritableImage;
+                imgView3_1.setImage(image);
             }
         }
         capture.release();
