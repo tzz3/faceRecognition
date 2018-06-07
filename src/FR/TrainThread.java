@@ -14,6 +14,7 @@ public class TrainThread extends Thread {
     }
 
     public void run() {
+        System.out.println("\n图像训练开始!");
         FaceRecognition FR = new FaceRecognition();
         if (threadName.equals("training")) {
             FR.getTrainFaceMat(imgList);//处理完成图片
@@ -24,6 +25,7 @@ public class TrainThread extends Thread {
         FR.calNormTrainFaceMat();
         FR.calculateEigenTrain();
         FR.LDA();
+        System.out.println("样本训练完成！\n");
     }
 
     public void start() {

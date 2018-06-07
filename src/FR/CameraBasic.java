@@ -10,7 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Objects;
 
-class CameraBasic {
+class CameraBasic338 {
 
     static {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -27,7 +27,7 @@ class CameraBasic {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    CameraBasic window = new CameraBasic();
+                    CameraBasic338 window = new CameraBasic338();
                     window.frame.setVisible(true);
 
                 } catch (Exception e) {
@@ -59,7 +59,7 @@ class CameraBasic {
     /**
      * Create the application.
      */
-    public CameraBasic() {
+    public CameraBasic338() {
         initialize();
     }
 

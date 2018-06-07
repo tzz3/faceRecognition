@@ -61,6 +61,8 @@ public class UIController {
     @FXML
     private Label label3_3;
     @FXML
+    private Label label3_4;
+    @FXML
     private Label label4_1;
     @FXML
     private ImageView imgView4_1;
@@ -94,6 +96,7 @@ public class UIController {
     }
 
     public void setImgView3_1() {
+        label3_4.setText(" ");
         selectPic();
         imgView3_1.setImage(image);
         String[] path = imgPath.split("/");
@@ -105,7 +108,8 @@ public class UIController {
         takePhotoFlag = false;
         clickCount = 0;
         final FileChooser filechooser = new FileChooser();
-        String picDir = "C:\\Users\\tzz\\Desktop\\图像处理课程设计2018秋\\人脸测试库";
+//        String picDir = "C:\\Users\\tzz\\Desktop\\图像处理课程设计2018秋\\人脸测试库";
+        String picDir = "C:\\Users\\tzz\\Desktop\\图像处理课程设计2018秋\\新建文件夹 (2)";
         filechooser.setInitialDirectory(new File(picDir));
         Stage stage = new Stage();
         File file = filechooser.showOpenDialog(stage);
@@ -204,10 +208,12 @@ public class UIController {
 //                Imgproc.resize(src, dst, new Size(48, 48), 0, 0, INTER_LINEAR);
 //                normalizeImg = fr.getImgFromMat(dst);
 //                normalizeImg = fr.getImgFromMat(fr.equalization(fr.getGrayMatFromImg(normalizeImg)));
+                //均衡化显示
+                Image image = fr.getImgFromMat(fr.equalization(fr.getGrayMatFromImg(normalizeImg)));
                 if (imgView.equals("img2")) {
-                    img2.setImage(normalizeImg);
+                    img2.setImage(image);//normalizeImg
                 } else if (imgView.equals("imgView3_2")) {
-                    imgView3_2.setImage(normalizeImg);
+                    imgView3_2.setImage(image);//normalizeImg
                 }
             } else {
                 p1_x = event.getX();
@@ -229,20 +235,11 @@ public class UIController {
     }
 
 
-    /**
-     * 允许点击选点
-     *
-     * @param event ActionEvent
-     */
-    public void normalize(ActionEvent event) {
-        click = true;
-    }
-
     /***
      * 保存图片
      * @param event ActionEvent
      */
-    public void savePic(ActionEvent event) {
+    public void savePic338(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save Image");
         String picDir = "C:\\Users\\tzz\\Desktop\\图像处理课程设计2018秋";
@@ -271,13 +268,13 @@ public class UIController {
      * 选择训练文件夹
      * @param actionEvent ActionEvent
      */
-    public void selectDir(ActionEvent actionEvent) {
-//        picNum = FaceRecognition.readPicNumFromFile();
+    public void selectDir338(ActionEvent actionEvent) {
+        picNum = FaceRecognition.readPicNumFromFile();
+        System.out.println("picNum:" + picNum);
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setInitialDirectory(new File("C:\\Users\\tzz\\Desktop\\图像处理课程设计2018秋"));
         Stage stage = new Stage();
         File dir = directoryChooser.showDialog(stage);
-        System.out.println("picNum:" + picNum);
         if (dir != null) {
             FaceRecognition FR = new FaceRecognition();
             imgList = FR.getImages(dir, picNum);
@@ -285,7 +282,8 @@ public class UIController {
         }
     }
 
-    public void openSecondStage() {
+
+    public void openSecondStage338() {
         try {
             Stage secondStage = new Stage();
             javafx.scene.layout.AnchorPane root1 = FXMLLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource("FR/UI2.fxml")));
@@ -301,34 +299,29 @@ public class UIController {
     public void setPicNum() {
         try {
             picNum = Integer.parseInt(text2_1_1.getText());
-//            FaceRecognition.savePicNumToFile(picNum);
+            System.out.println("picNum:" + picNum);
+            FaceRecognition.savePicNumToFile(picNum);
+//            System.out.println(FaceRecognition.readPicNumFromFile());
             label2_1_1.setText("修改成功");
         } catch (Exception e) {
             label2_1_1.setText("输入错误");
         }
-        System.out.println(picNum);
     }
 
     //样本训练
-    public void training() throws InterruptedException {
-//        pb2_1.setProgress(0);
+    public void training338() throws InterruptedException {
         TrainThread thread = new TrainThread("training", imgList);
         thread.start();
-//        pb2_1.setProgress(1);
-//        label2_1.setText("样本训练完成");
     }
 
     //训练未处理图像集
-    public void training2() throws InterruptedException {
-//        pb2_1.setProgress(0);
+    public void training2338() throws InterruptedException {
         TrainThread thread = new TrainThread("training2", imgList);
         thread.start();
-//        pb2_1.setProgress(1);
-//        label2_1.setText("样本训练完成");
     }
 
-    //人脸识别
-    public void recognition() {
+    //LDA人脸识别
+    public void LDA338() {
         if (normalizeImg != null) {
             FaceRecognition FR = new FaceRecognition();
             Mat mat = FR.getGrayMatFromImg(normalizeImg);
@@ -345,15 +338,20 @@ public class UIController {
             System.out.println(name + " " + imgpath[imgpath.length - 1]);
             if (!takePhotoFlag) {
                 if (imgpath[imgpath.length - 1].split("_")[0].equals(name)) {
-                    label3_3.setText("识别成功，结果为：" + name);
+                    label3_3.setText("LDA识别成功，结果为：" + name);
                 } else {
-                    label3_3.setText("识别错误");
+                    label3_4.setText("LDA识别错误，启动PCA识别");
+                    label3_3.setText("");
+                    PCA338();
                 }
+            } else {
+                label3_3.setText("  ");
             }
         }
     }
 
-    public void PCA() {
+    //PCA图像识别
+    public void PCA338() {
         if (normalizeImg != null) {
             FaceRecognition FR = new FaceRecognition();
             Mat mat = FR.getGrayMatFromImg(normalizeImg);
@@ -370,20 +368,24 @@ public class UIController {
             System.out.println(name + " " + imgpath[imgpath.length - 1]);
             if (!takePhotoFlag) {
                 if (imgpath[imgpath.length - 1].split("_")[0].equals(name)) {
-                    label3_3.setText("识别成功，结果为：" + name);
+                    label3_3.setText("PCA识别成功，结果为：" + name);
                 } else {
                     label3_3.setText("识别错误");
                 }
+            } else {
+                label3_3.setText("  ");
             }
         }
     }
 
 
-    public void takePhoto() {
+    public void takePhoto338() {
+        label3_1.setText("");
+//        imgPath = null;
         takePhotoFlag = true;
         clickCount = 0;
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        CameraBasic.photo();
+        CameraBasic338.photo();
         VideoCapture capture = new VideoCapture(0);
         Mat matrix = new Mat();
         capture.read(matrix);
