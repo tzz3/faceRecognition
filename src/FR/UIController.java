@@ -108,7 +108,7 @@ public class UIController {
         takePhotoFlag = false;
         clickCount = 0;
         final FileChooser filechooser = new FileChooser();
-//        String picDir = "C:\\Users\\tzz\\Desktop\\图像处理课程设计2018秋\\人脸测试库";
+        //String picDir = "C:\\Users\\tzz\\Desktop\\图像处理课程设计2018秋\\人脸测试库";
         String picDir = "C:\\Users\\tzz\\Desktop\\图像处理课程设计2018秋\\新建文件夹 (2)";
         filechooser.setInitialDirectory(new File(picDir));
         Stage stage = new Stage();
@@ -301,7 +301,7 @@ public class UIController {
             picNum = Integer.parseInt(text2_1_1.getText());
             System.out.println("picNum:" + picNum);
             FaceRecognition.savePicNumToFile(picNum);
-//            System.out.println(FaceRecognition.readPicNumFromFile());
+            //System.out.println(FaceRecognition.readPicNumFromFile());
             label2_1_1.setText("修改成功");
         } catch (Exception e) {
             label2_1_1.setText("输入错误");
@@ -327,7 +327,7 @@ public class UIController {
             Mat mat = FR.getGrayMatFromImg(normalizeImg);
             Mat eMat = FR.equalization(mat);
             Image image = FR.getImgFromMat(eMat);
-//            String result = FR.calTestFaceMat(normalizeImg);
+            //String result = FR.calTestFaceMat(normalizeImg);
             String result = FR.calLDATestSample(image);//normalize
             String[] path = result.split("\\\\");
             label3_2.setText(path[path.length - 1]);
@@ -358,7 +358,7 @@ public class UIController {
             Mat eMat = FR.equalization(mat);
             Image image = FR.getImgFromMat(eMat);
             String result = FR.calTestFaceMat(image);
-//            String result = FR.calLDATestSample(image);//normalize
+            //String result = FR.calLDATestSample(image);//normalize
             String[] path = result.split("\\\\");
             label3_2.setText(path[path.length - 1]);
             System.out.println(result);
@@ -381,7 +381,7 @@ public class UIController {
 
     public void takePhoto338() {
         label3_1.setText("");
-//        imgPath = null;
+        //imgPath = null;
         takePhotoFlag = true;
         clickCount = 0;
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -400,13 +400,13 @@ public class UIController {
                 Imgcodecs.imwrite("photo.bmp", matrix);
                 //图片处理-》 未处理-》 直方均衡化
                 //图片 -》 直方均衡化
-//                FaceRecognition FR = new FaceRecognition();
-//                Mat mat = FR.getGrayMatFromImg(WritableImage);
-//                Mat eMat = FR.equalization(mat);
-//                Image img = FR.getImgFromMat(eMat);
-//                normalizeImg = img;
-//                imgView3_1.setImage(img);//sanpshot.jpg
-//                image = img;
+                //FaceRecognition FR = new FaceRecognition();
+                //Mat mat = FR.getGrayMatFromImg(WritableImage);
+                //Mat eMat = FR.equalization(mat);
+                //Image img = FR.getImgFromMat(eMat);
+                //normalizeImg = img;
+                //imgView3_1.setImage(img);//sanpshot.jpg
+                //image = img;
                 image = WritableImage;
                 imgView3_1.setImage(image);
             }

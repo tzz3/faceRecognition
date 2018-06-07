@@ -17,12 +17,9 @@ class CameraBasic338 {
     }
 
     private JFrame frame;
-    static JLabel label;
-    static int flag = 0;//类静态变量，用于控制按下按钮后 停止摄像头的读取
+    private static JLabel label;
+    private static int flag = 0;//类静态变量，用于控制按下按钮后 停止摄像头的读取
 
-    /**
-     * Launch the application.
-     */
     static void photo() {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -35,7 +32,6 @@ class CameraBasic338 {
                 }
             }
         });
-        //我们的操作
         VideoCapture camera = new VideoCapture();//创建Opencv中的视频捕捉对象
         camera.open(0);//open函数中的0代表当前计算机中索引为0的摄像头，如果你的计算机有多个摄像头，那么一次1,2,3……
         if (!camera.isOpened()) {//isOpened函数用来判断摄像头调用是否成功
@@ -48,7 +44,6 @@ class CameraBasic338 {
                 try {
                     Thread.sleep(100);//线程暂停100ms
                 } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
@@ -56,16 +51,10 @@ class CameraBasic338 {
         }
     }
 
-    /**
-     * Create the application.
-     */
-    public CameraBasic338() {
+    private CameraBasic338() {
         initialize();
     }
 
-    /**
-     * Initialize the contents of the frame.
-     */
     private void initialize() {
         flag = 0;
         frame = new JFrame();
