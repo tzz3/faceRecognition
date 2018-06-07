@@ -59,11 +59,15 @@ public class UIController {
     @FXML
     private Label label3_2;
     @FXML
+    private Label label3_3;
+    @FXML
     private Label label4_1;
     @FXML
     private ImageView imgView4_1;
     @FXML
     private ProgressBar pb2_1;
+    @FXML
+    private Label label2_1;
 
     @FXML
     private TextField text2_1_1;
@@ -81,12 +85,12 @@ public class UIController {
     private String imgView = "";
     private int picNum = 9;//每组样本数量
     private String imgPath = "";
+    private boolean takePhotoFlag = false;
 
 
     public void setImg1() {
         selectPic();
         img1.setImage(image);
-
     }
 
     public void setImgView3_1() {
@@ -98,6 +102,7 @@ public class UIController {
 
     //选择图片
     public void selectPic() {
+        takePhotoFlag = false;
         clickCount = 0;
         final FileChooser filechooser = new FileChooser();
         String picDir = "C:\\Users\\tzz\\Desktop\\图像处理课程设计2018秋\\人脸测试库";
@@ -193,7 +198,7 @@ public class UIController {
                 }
                 FaceRecognition fr = new FaceRecognition();
                 normalizeImg = fr.normalize(image, begin, end, zoom_multiples);
-                
+
 //                Mat src = fr.getGrayMatFromImg(image);
 //                Mat dst = new Mat();
 //                Imgproc.resize(src, dst, new Size(48, 48), 0, 0, INTER_LINEAR);
@@ -267,11 +272,12 @@ public class UIController {
      * @param actionEvent ActionEvent
      */
     public void selectDir(ActionEvent actionEvent) {
+//        picNum = FaceRecognition.readPicNumFromFile();
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setInitialDirectory(new File("C:\\Users\\tzz\\Desktop\\图像处理课程设计2018秋"));
         Stage stage = new Stage();
         File dir = directoryChooser.showDialog(stage);
-        System.out.println(picNum);
+        System.out.println("picNum:" + picNum);
         if (dir != null) {
             FaceRecognition FR = new FaceRecognition();
             imgList = FR.getImages(dir, picNum);
@@ -295,6 +301,7 @@ public class UIController {
     public void setPicNum() {
         try {
             picNum = Integer.parseInt(text2_1_1.getText());
+//            FaceRecognition.savePicNumToFile(picNum);
             label2_1_1.setText("修改成功");
         } catch (Exception e) {
             label2_1_1.setText("输入错误");
@@ -304,41 +311,77 @@ public class UIController {
 
     //样本训练
     public void training() throws InterruptedException {
-        pb2_1.setProgress(0);
+//        pb2_1.setProgress(0);
         TrainThread thread = new TrainThread("training", imgList);
         thread.start();
-        pb2_1.setProgress(1);
+//        pb2_1.setProgress(1);
+//        label2_1.setText("样本训练完成");
     }
 
     //训练未处理图像集
     public void training2() throws InterruptedException {
-        pb2_1.setProgress(0);
+//        pb2_1.setProgress(0);
         TrainThread thread = new TrainThread("training2", imgList);
         thread.start();
-        pb2_1.setProgress(1);
+//        pb2_1.setProgress(1);
+//        label2_1.setText("样本训练完成");
     }
 
     //人脸识别
     public void recognition() {
-        //normalizeImg
         if (normalizeImg != null) {
-//            imgView3_2.setImage(normalizeImg);
             FaceRecognition FR = new FaceRecognition();
             Mat mat = FR.getGrayMatFromImg(normalizeImg);
             Mat eMat = FR.equalization(mat);
             Image image = FR.getImgFromMat(eMat);
 //            String result = FR.calTestFaceMat(normalizeImg);
-
             String result = FR.calLDATestSample(image);//normalize
             String[] path = result.split("\\\\");
             label3_2.setText(path[path.length - 1]);
             System.out.println(result);
+            String name = path[path.length - 1].split("_")[0];
             imgView3_3.setImage(new Image("file:/" + result));
+            String[] imgpath = imgPath.split("/");
+            System.out.println(name + " " + imgpath[imgpath.length - 1]);
+            if (!takePhotoFlag) {
+                if (imgpath[imgpath.length - 1].split("_")[0].equals(name)) {
+                    label3_3.setText("识别成功，结果为：" + name);
+                } else {
+                    label3_3.setText("识别错误");
+                }
+            }
+        }
+    }
+
+    public void PCA() {
+        if (normalizeImg != null) {
+            FaceRecognition FR = new FaceRecognition();
+            Mat mat = FR.getGrayMatFromImg(normalizeImg);
+            Mat eMat = FR.equalization(mat);
+            Image image = FR.getImgFromMat(eMat);
+            String result = FR.calTestFaceMat(image);
+//            String result = FR.calLDATestSample(image);//normalize
+            String[] path = result.split("\\\\");
+            label3_2.setText(path[path.length - 1]);
+            System.out.println(result);
+            String name = path[path.length - 1].split("_")[0];
+            imgView3_3.setImage(new Image("file:/" + result));
+            String[] imgpath = imgPath.split("/");
+            System.out.println(name + " " + imgpath[imgpath.length - 1]);
+            if (!takePhotoFlag) {
+                if (imgpath[imgpath.length - 1].split("_")[0].equals(name)) {
+                    label3_3.setText("识别成功，结果为：" + name);
+                } else {
+                    label3_3.setText("识别错误");
+                }
+            }
         }
     }
 
 
     public void takePhoto() {
+        takePhotoFlag = true;
+        clickCount = 0;
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         CameraBasic.photo();
         VideoCapture capture = new VideoCapture(0);

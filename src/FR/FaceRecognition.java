@@ -216,7 +216,7 @@ public class FaceRecognition {
             try {
                 Image image = new Image(file.toURI().toURL().toString());
                 Mat mat = getGrayMatFromImg(image);
-                System.out.println(file);
+//                System.out.println(file);
                 Mat eMat = equalization(mat);
 
                 int z = 0;
@@ -246,7 +246,7 @@ public class FaceRecognition {
         for (File file : arrayList) {
             try {
                 Image image = new Image(file.toURI().toURL().toString());
-                System.out.println(file);
+//                System.out.println(file);
                 PixelReader pixelReader = image.getPixelReader();
                 double[] pixelList = new double[(int) (image.getWidth() * image.getHeight())];
                 int z = 0;
@@ -625,6 +625,31 @@ public class FaceRecognition {
                 }
                 bw.write("\n");
             }
+            bw.close();
+            fileWriter.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static int readPicNumFromFile() {
+        try {
+            FileReader fileReader = new FileReader("picNum");
+            BufferedReader br = new BufferedReader(fileReader);
+            int picNum = br.read();
+            br.close();
+            fileReader.close();
+            return picNum;
+        } catch (IOException e) {
+            return 9;
+        }
+    }
+
+    public static void savePicNumToFile(int picnum) {
+        try {
+            FileWriter fileWriter = new FileWriter("picNum");
+            BufferedWriter bw = new BufferedWriter(fileWriter);
+            bw.write(picnum);
             bw.close();
             fileWriter.close();
         } catch (Exception e) {

@@ -52,6 +52,7 @@ class CameraBasic {
                     e.printStackTrace();
                 }
             }
+            camera.release();
         }
     }
 
