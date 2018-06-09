@@ -298,11 +298,13 @@ public class UIController {
 
     public void setPicNum() {
         try {
-            picNum = Integer.parseInt(text2_1_1.getText());
-            System.out.println("picNum:" + picNum);
-            FaceRecognition.savePicNumToFile(picNum);
-            //System.out.println(FaceRecognition.readPicNumFromFile());
-            label2_1_1.setText("修改成功");
+            if (text2_1_1.getText() != null) {
+                picNum = Integer.parseInt(text2_1_1.getText());
+                System.out.println("picNum:" + picNum);
+                FaceRecognition.savePicNumToFile(picNum);
+                //System.out.println(FaceRecognition.readPicNumFromFile());
+                label2_1_1.setText("修改成功");
+            }
         } catch (Exception e) {
             label2_1_1.setText("输入错误");
         }
@@ -378,7 +380,32 @@ public class UIController {
         }
     }
 
+    //摄像头采集样本
+    public void takePhoto() {
+        takePhotoFlag = true;
+        clickCount = 0;
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        CameraBasic338.photo();
+        VideoCapture capture = new VideoCapture(0);
+        Mat matrix = new Mat();
+        capture.read(matrix);
+        if (capture.isOpened()) {
+            if (capture.read(matrix)) {
+                BufferedImage bufferedImage = new BufferedImage(matrix.width(), matrix.height(), BufferedImage.TYPE_3BYTE_BGR);
+                WritableRaster raster = bufferedImage.getRaster();
+                DataBufferByte dataBuffer = (DataBufferByte) raster.getDataBuffer();
+                byte[] data = dataBuffer.getData();
+                matrix.get(0, 0, data);
+                Image WritableImage = SwingFXUtils.toFXImage(bufferedImage, null);
+                Imgcodecs.imwrite("photo.bmp", matrix);
+                image = WritableImage;
+                img1.setImage(image);
+            }
+        }
+        capture.release();
+    }
 
+    //摄像头识别
     public void takePhoto338() {
         label3_1.setText("");
         //imgPath = null;
@@ -397,7 +424,7 @@ public class UIController {
                 byte[] data = dataBuffer.getData();
                 matrix.get(0, 0, data);
                 Image WritableImage = SwingFXUtils.toFXImage(bufferedImage, null);
-                Imgcodecs.imwrite("photo.bmp", matrix);
+                Imgcodecs.imwrite("photo2.bmp", matrix);
                 //图片处理-》 未处理-》 直方均衡化
                 //图片 -》 直方均衡化
                 //FaceRecognition FR = new FaceRecognition();
@@ -413,5 +440,4 @@ public class UIController {
         }
         capture.release();
     }
-
 }

@@ -16,7 +16,14 @@
                     <content>
                         <Pane fx:id="pane1" prefHeight="200.0" prefWidth="200.0">
                             <children>
-                                <Button fx:id="bt1" layoutX="161.0" layoutY="30.0" mnemonicParsing="false" onAction="#setImg1" prefHeight="48.0" prefWidth="99.0" text="打开图像" />
+                                <Button fx:id="bt1" layoutX="161.0" layoutY="30.0" mnemonicParsing="false" onAction="#setImg1" prefHeight="48.0" prefWidth="99.0" text="打开图像">
+                           <contextMenu>
+                              <ContextMenu>
+                                <items>
+                                  <MenuItem mnemonicParsing="false" onAction="#takePhoto" text="摄像头采集" />
+                                </items>
+                              </ContextMenu>
+                           </contextMenu></Button>
                                 <Button fx:id="bt2" layoutX="311.0" layoutY="30.0" mnemonicParsing="false" onAction="#setImg2" prefHeight="48.0" prefWidth="99.0" text="图像归一化" />
                                 <Pane fx:id="pane_img1" layoutX="110.0" layoutY="119.0">
                                     <children>
